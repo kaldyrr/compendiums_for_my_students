@@ -1,4 +1,4 @@
-# Компендим по JavaScript
+# Компендиум по JavaScript
 
 Расширенный путеводитель по JavaScript, охватывающий путь от самых основ до продвинутых тем фронтенд и бэкенд‑разработки. Включает настройку окружения, теорию языка, best practices, архитектуру, тестирование, перфоманс и DevOps. Рассчитан на читателя, который хочет закрыть все пробелы и понимать, как строить масштабируемые проекты.
 
@@ -12,25 +12,26 @@
 ---
 
 ## 2. Окружение и инструменты
-1. **Node.js LTS (18+)** — движок V8 + стандартная библиотека.
-2. **npm/pnpm/yarn** — менеджеры пакетов; `pnpm` быстро работает с монорепами.
+1. **Node.js (текущая Active LTS)** — основной рантайм на V8. Альтернативы под задачи: Deno, Bun.
+2. **npm/pnpm/yarn** — менеджеры пакетов; Corepack управляет версиями. `pnpm` удобен для монореп и кешей.
 3. **Редактор**: VS Code с расширениями (ESLint, Prettier, GitLens, REST Client).
 4. **Браузеры**: Chrome/Edge/Firefox с DevTools, React/Vue DevTools.
 5. **CLI**:
    ```bash
    node -v
    npm -v
-   corepack enable    # включает pnpm и yarn, если нужно
+   corepack enable    # включает pnpm/yarn при необходимости
    ```
-6. **Автоматизация**: nvm/fnm/volta для управления версиями Node.
+6. **Менеджеры версий**: nvm/fnm/volta/asdf для управления версиями Node.
 
 ---
 
 ## 3. Структура проекта
-- `package.json` — зависимости, скрипты, metadata.
+- `package.json` — зависимости, скрипты, metadata, `type`, `exports`.
 - `src/` — исходники, `dist/`/`build/` — результирующий код.
 - `public/` (SPA) — статические ресурсы.
-- `.editorconfig`, `.eslintrc`, `.prettierrc`, `.gitignore`.
+- `.editorconfig`, `eslint.config.js`, `.prettierrc`, `.gitignore`.
+- Lockfiles: `package-lock.json` / `pnpm-lock.yaml` / `yarn.lock`.
 - Monorepo: pnpm workspaces, Turborepo, Nx.
 
 ---
@@ -49,7 +50,9 @@
   - Optional chaining `?.`
   - Logical assignment `||=`, `&&=`
 - Массивы: `map`, `filter`, `reduce`, `find`, `some`, `flatMap`.
+- Коллекции: `Map`, `Set`, `WeakMap`, `WeakSet`.
 - Объекты: `Object.keys`, `Object.entries`, `structuredClone`.
+- Международные форматы: `Intl.DateTimeFormat`, `Intl.NumberFormat`.
 
 ---
 
@@ -97,6 +100,7 @@
   ```
 - **CommonJS**: `module.exports = { sum }`, `const { sum } = require("./math");`.
 - Используйте ESM для современных проектов (`"type": "module"` в package.json) или bundler.
+- Полезно знать: `import.meta`, динамический `import()`, top‑level `await` (в ESM).
 
 ---
 
@@ -114,7 +118,7 @@
   }
   ```
 - `Promise.all`, `.allSettled`, `.any`, `.race`.
-- AbortController, Streams, Web Workers.
+- AbortController, Streams, Web Workers, `queueMicrotask`.
 - Обработка ошибок: `try/catch`, `promise.catch`, `unhandledrejection`.
 
 ---
@@ -131,17 +135,18 @@
   });
   ```
 - FormData, Canvas, Web Storage, Service Workers, WebSockets.
+- Observer API: `IntersectionObserver`, `ResizeObserver`, `MutationObserver`.
 - Accessibility, ARIA, focus management.
 
 ---
 
 ## 10. Фреймворки и библиотеки
-- **React**: компоненты, hooks (`useState`, `useEffect`, `useMemo`), серверные компоненты (Next.js).
-- **Vue**: Composition API, `<script setup>`, Pinia.
-- **Svelte**, **Solid.js** — реактивность на уровне компиляции.
-- **State management**: Redux Toolkit, Zustand, MobX, XState.
-- **Styling**: CSS Modules, Tailwind CSS, CSS-in-JS (emotion, styled-components).
-- **Routing**: React Router, Next.js App Router, TanStack Router.
+- **React**: hooks, server components (Next.js/Remix).
+- **Vue**: Composition API, `<script setup>`, Pinia, Nuxt.
+- **Svelte** (SvelteKit), **Solid**, **Qwik** — реактивность на уровне компиляции.
+- **State management**: Redux Toolkit, Zustand, Jotai, MobX, XState.
+- **Styling**: CSS Modules, Tailwind CSS, CSS-in-JS (emotion, styled-components), vanilla-extract.
+- **Routing**: React Router, TanStack Router, Next.js App Router.
 
 ---
 
@@ -151,8 +156,9 @@
   import { readFile } from "node:fs/promises";
   const config = JSON.parse(await readFile("./config.json", "utf8"));
   ```
+- Встроенные Web API: `fetch`, `AbortController`, `FormData`, `Web Streams`, `WebCrypto`, `URL`, `URLPattern`.
 - Express, Fastify, NestJS, Hono.
-- БД: Prisma, Sequelize, TypeORM, Mongoose, Drizzle ORM, knex.
+- БД: Prisma, Drizzle ORM, Kysely, Sequelize, TypeORM, Mongoose, knex.
 - Потоки и буферы: backpressure, pipeline (`stream/promises`).
 - CLI: Commander, yargs, oclif.
 - Background jobs: BullMQ, Agenda.
@@ -163,15 +169,15 @@
 ## 12. Type checking и качество кода
 - **TypeScript** — рекомендуемый способ статической проверки. Если остаётесь на JS:
   - JSDoc аннотации `/** @type {import("./types").User} */`.
-  - `// @ts-check` + `tsconfig.json`.
-- ESLint + `@typescript-eslint`, Prettier, Stylelint.
+  - `// @ts-check` + `tsconfig.json` (`checkJs: true`).
+- ESLint (flat config) + `@typescript-eslint`, Prettier или Biome, Stylelint.
 - Husky + lint-staged для pre-commit.
 - Commitlint + Conventional Commits.
 
 ---
 
 ## 13. Тестирование
-- Unit: Vitest, Jest, Mocha + Chai.
+- Unit: Vitest, Jest, Mocha + Chai, `node:test`.
 - Component tests: Testing Library, Cypress Component, Playwright CT.
 - E2E: Playwright, Cypress, WebdriverIO.
 - Contract tests: Pact.
@@ -182,7 +188,7 @@
 ---
 
 ## 14. Сборка и bundlers
-- Vite (esbuild + Rollup), webpack, Parcel, Snowpack.
+- Vite (esbuild + Rollup), webpack, Rollup, Parcel, Rspack, Turbopack.
 - Build targets: modern browsers, legacy bundles (Babel, core-js).
 - Tree shaking, code splitting, dynamic import.
 - Transpilers: Babel, SWC, esbuild.
@@ -207,13 +213,13 @@
 - Clickjacking: `X-Frame-Options`, CSP frame-ancestors.
 - Auth: OAuth/OIDC, JWT, session cookies, WebAuthn.
 - Rate limiting, input validation (Zod, joi, yup).
-- npm hygiene: проверка зависимостей (npm audit, snyk, socket).
+- npm hygiene: lockfiles, проверка зависимостей (npm/pnpm audit, Snyk, Socket), авто‑обновления (Dependabot/Renovate).
 - Secure headers (helmet), TLS, secret management.
 
 ---
 
 ## 17. Производительность
-- Lighthouse, Web Vitals (CLS, LCP, FID, INP).
+- Lighthouse, Web Vitals (LCP, INP, CLS, TTFB). INP заменил FID.
 - Bundle анализ: `source-map-explorer`, `webpack-bundle-analyzer`.
 - Lazy loading, priority hints, prefetch/preload.
 - Memoization (`useMemo`, `React.memo`, `memoize-one`).
@@ -227,18 +233,18 @@
 - GitHub Actions/GitLab CI: `npm ci`, `npm test`, `npm run build`.
 - Docker multi-stage:
   ```dockerfile
-  FROM node:20-alpine AS deps
+  FROM node:lts-alpine AS deps
   WORKDIR /app
   COPY package.json pnpm-lock.yaml ./
   RUN corepack enable && pnpm install --frozen-lockfile
 
-  FROM node:20-alpine AS build
+  FROM node:lts-alpine AS build
   WORKDIR /app
   COPY --from=deps /app/node_modules ./node_modules
   COPY . .
   RUN pnpm build
 
-  FROM node:20-alpine AS runtime
+  FROM node:lts-alpine AS runtime
   WORKDIR /app
   ENV NODE_ENV=production
   COPY --from=build /app/dist ./dist

@@ -1,19 +1,19 @@
-# Компендим по TypeScript
+# Компендиум по TypeScript
 
-Глубокое руководство по TypeScript: установка, конфигурация, статическая типизация, продвинутые типы, сборка, тестирование и интеграция с современными фреймворками. Материал ориентирован на разработчиков, которые хотят писать надёжный JavaScript‑код.
+Глубокое руководство по TypeScript: установка, конфигурация, статическая типизация, продвинутые типы, сборка, тестирование и интеграция с современными фреймворками. Материал ориентирован на разработчиков, которые хотят писать надёжный JavaScript‑код. На момент обновления актуальна ветка TypeScript 5.9.
 
 ---
 
 ## 1. Подготовка окружения
-- Установите Node.js LTS (18+). Проверка: `node -v`, `npm -v`.
-- Альтернативные менеджеры: `nvm`, `fnm`, `volta`.
+- Установите Node.js (актуальная LTS). Проверка: `node -v`, `npm -v`.
+- Менеджеры версий: `nvm`, `fnm`, `volta`, `asdf`.
 - Установите TypeScript глобально или как dev-зависимость:
   ```bash
   npm install -D typescript
   npx tsc --version
   ```
 - Рекомендуемые инструменты:
-  - Менеджер пакетов: `pnpm` (быстрый), `yarn`, `npm`.
+  - Менеджер пакетов: `pnpm` (быстрый), `yarn`, `npm` (через Corepack).
   - Редактор: VS Code (встроенная поддержка TS), WebStorm.
   - Линтеры: ESLint (`@typescript-eslint`), Prettier.
 
@@ -27,11 +27,15 @@
     "compilerOptions": {
       "target": "ES2022",
       "module": "ESNext",
-      "moduleResolution": "Node",
+      "moduleResolution": "Bundler",
       "strict": true,
       "noImplicitAny": true,
       "exactOptionalPropertyTypes": true,
       "noUncheckedIndexedAccess": true,
+      "noImplicitOverride": true,
+      "useUnknownInCatchVariables": true,
+      "verbatimModuleSyntax": true,
+      "isolatedModules": true,
       "skipLibCheck": true,
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
@@ -47,6 +51,7 @@
     "exclude": ["node_modules"]
   }
   ```
+- Для Node.js-проектов используйте `module: "Node20"` и `moduleResolution: "Node20"`. `NodeNext` оставляйте только если нужен плавающий режим под новые ветки Node. Для bundler‑проектов оставляйте `Bundler`.
 - Для монореп (pnpm workspaces, Nx, Turborepo) используйте `tsconfig.base.json` и наследование.
 - Служебные файлы: `tsconfig.node.json`, `tsconfig.eslint.json`.
 
@@ -119,7 +124,7 @@ const users: Array<{ id: number; name: string }> = [
   }
   ```
 - Абстрактные классы, геттеры/сеттеры, статические методы.
-- Декораторы (экспериментальная функция): обязательно включите `"experimentalDecorators": true`.
+- Декораторы: для нового кода предпочитайте стандартные decorators. `experimentalDecorators` включайте только для legacy‑фреймворков и старых библиотек.
 
 ---
 
@@ -202,17 +207,19 @@ const users: Array<{ id: number; name: string }> = [
 
 ## 10. Работа с модулями
 - ESM (ECMAScript Modules) по умолчанию: `import`, `export`.
-- Для CommonJS укажите `"module": "CommonJS"` или используйте `ts-node/register`.
+- Для CommonJS укажите `"module": "CommonJS"`. Для Node.js ESM используйте `module: "Node20"` и `moduleResolution: "Node20"`.
 - `esModuleInterop`: позволяет писать `import express from "express"` для CommonJS библиотек.
 - Типы из DefinitelyTyped: `@types/express`, `@types/node`.
 - `declare global` и `declare module` — расширение типов.
+- Для библиотек важно публиковать корректные `exports`/`types` в `package.json`, чтобы потребители получали ESM/CJS и типы без костылей.
 
 ---
 
 ## 11. Сборка и инструментальная цепочка
 - `tsc` — компиляция без bundling. Для проектов используйте bundlers:
   - Web: `vite`, `webpack`, `esbuild`, `parcel`.
-  - Backend: `ts-node-dev`, `tsx`, `esbuild`, `swc`.
+  - Backend: `tsx`, `ts-node-dev`, `esbuild`, `swc`.
+  - Библиотеки: `tsup`, `unbuild`, Rollup.
   - Monorepo: `turbo`, `nx`, `rush`.
 - Пример `package.json`:
   ```json
@@ -225,7 +232,8 @@ const users: Array<{ id: number; name: string }> = [
     }
   }
   ```
-- `ts-node`/`tsx` для запуска TS напрямую (Node >=18 поддерживает `--loader ts-node/esm`).
+- `tsc --noEmit` для тип‑проверки, а сборку — через bundler.
+- `ts-node`/`tsx` для запуска TS напрямую (предпочтительно `tsx` для dev).
 - Sourcemaps: включите `"sourceMap": true` для дебага.
 
 ---
@@ -256,11 +264,12 @@ const users: Array<{ id: number; name: string }> = [
   ```
 - Prettier — форматирование. Настройте совместимость с ESLint (`eslint-config-prettier`).
 - Husky + lint-staged — pre-commit проверки.
+- Альтернатива: Biome (форматирование + линтинг из коробки).
 
 ---
 
 ## 13. Тестирование
-- Unit: Vitest, Jest, uvu.
+- Unit: Vitest, Jest, uvu, `node:test`.
 - E2E: Playwright, Cypress.
 - Пример Vitest:
   ```ts
@@ -325,7 +334,7 @@ const users: Array<{ id: number; name: string }> = [
 - Webpack/Vite оптимизации: code splitting, tree shaking, `import type`.
 - В Node — использовании `ts-node` только для dev, для prod — компиляция/бандлинг.
 - Профилирование Node: `node --prof`, `clinic.js`.
-- Docker: multi-stage build (tsc -> node:18-slim).
+- Docker: multi-stage build (tsc -> node:lts-slim), в проде — pin к конкретному digest.
 - CI: `npm ci`, `pnpm install --frozen-lockfile`, `tsc --noEmit`, `eslint`, `vitest`.
 
 ---

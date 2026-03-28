@@ -1,4 +1,4 @@
-# Компендим по Node.js
+# Компендиум по Node.js
 
 Полный курс по Node.js: от установки и понимания движка до построения масштабируемых высоконагруженных систем. Материал рассчитан на разработчиков, знакомых с JavaScript, но охватывает путь от самых основ до продвинутых тем (производительность, безопасность, DevOps).
 
@@ -13,11 +13,12 @@
   - CLI / DevOps automation.
   - Streaming, proxy, serverless-функции.
   - SSR/SSG для фронтенда (Next.js, Nuxt, Remix).
+- Альтернативные рантаймы (Deno, Bun) бывают полезны в отдельных сценариях, но большинство продакшн‑практик и экосистемы всё ещё вокруг Node.js.
 
 ---
 
 ## 2. Установка и инструменты
-1. Скачайте LTS версию Node (18/20) с nodejs.org или установите через менеджеры:
+1. Скачайте текущую Active LTS версию Node.js с nodejs.org или установите через менеджеры:
    - Windows: nvm-windows / fnm.
    - macOS/Linux: `nvm`, `fnm`, `asdf`, `brew install node`.
 2. Проверьте:
@@ -44,9 +45,10 @@
       "build": "tsc -p tsconfig.build.json",
       "start": "NODE_ENV=production node dist/index.js"
     },
-    "engines": { "node": ">=18" }
+    "engines": { "node": ">=24" }
   }
   ```
+- Для новых сервисов ориентируйтесь на Active LTS (v24 на момент обновления). Производственные приложения должны использовать только Active LTS или Maintenance LTS.
 - `package-lock.json`/`pnpm-lock.yaml`: фиксация зависимостей.
 - `.npmrc` — настройки npm/pnpm (registry, save-exact).
 - Монорепы: pnpm workspaces, Turborepo, Nx.
@@ -54,7 +56,7 @@
 ---
 
 ## 4. Основы Node.js API
-- Глобальные объекты: `__dirname`, `process`, `Buffer`, `global`.
+- Глобальные объекты: `process`, `Buffer`, `global`. В ESM нет `__dirname`/`__filename` — используйте `import.meta.url`.
 - Модули:
   - CommonJS (`require`, `module.exports`).
   - ESM (`import`, `export`, `"type": "module"`).
@@ -71,6 +73,7 @@
   ```
 - Events: `EventEmitter`.
 - Timers: `setImmediate`, `process.nextTick`, `setTimeout`.
+- Встроенные Web API: `fetch`, `AbortController`, `FormData`, `Headers`, `Request`, `Response`, `Web Streams`, `WebCrypto`, `URL`, `URLPattern`.
 
 ---
 
@@ -97,7 +100,7 @@
   });
   server.listen(3000);
   ```
-- `http2` (gRPC, server push), `net` TCP-сокеты.
+- `http2` (gRPC), `net` TCP-сокеты. Server Push в браузерах устарел — используйте preload.
 - HTTPS: Let's Encrypt + `node:tls`, HSTS.
 - Proxy: `http-proxy`, `fast-proxy`.
 
@@ -107,7 +110,7 @@
 - **Express** — классический минималистичный фреймворк.
 - **Fastify** — быстрый, schema-based, поддержка TypeScript out of the box.
 - **NestJS** — модульная архитектура, DI, декораторы.
-- **Koa**, **Hapi**, **AdonisJS**, **Remix** (SSR).
+- **Koa**, **Hapi**, **AdonisJS**, **Hono**, **Remix** (SSR).
 - GraphQL: Apollo Server, Helix, Yoga.
 - RPC: tRPC, gRPC (`@grpc/grpc-js`).
 
@@ -127,9 +130,9 @@
 - NoSQL: MongoDB, Redis, Cassandra, Elastic.
 - ORM/ODM:
   - Prisma (code-first, TS-friendly).
+  - Drizzle ORM, Kysely (type-safe SQL).
   - TypeORM, Sequelize, MikroORM.
   - Mongoose (Mongo).
-  - Drizzle ORM (SQL, type-safe).
 - Caching: Redis, Memcached, in-memory LRU (`lru-cache`), CDN edge.
 - Message brokers: RabbitMQ (`amqplib`), Kafka (`kafkajs`), NATS, Redis Streams.
 
@@ -160,7 +163,7 @@
 ---
 
 ## 12. Тестирование
-- Unit tests: Vitest, Jest, Ava, tap.
+- Unit tests: Vitest, Jest, Ava, tap, встроенный `node:test`.
 - Integration: Supertest, LightMyRequest (Fastify), Pactum.
 - E2E: Playwright, Cypress (через API), k6 (нагрузка).
 - Testcontainers для поднятия БД в Docker.
@@ -202,7 +205,7 @@
         - uses: actions/checkout@v4
         - uses: actions/setup-node@v4
           with:
-            node-version: 20
+            node-version: "lts/*"
             cache: "pnpm"
         - run: corepack enable
         - run: pnpm install --frozen-lockfile
@@ -266,7 +269,7 @@
 ---
 
 ## 20. Ресурсы
-- Документация: [nodejs.org/docs](https://nodejs.org/docs/latest-v20.x/api/), [Fastify.dev](https://www.fastify.io/), [nestjs.com](https://nestjs.com/).
+- Документация: [nodejs.org/docs](https://nodejs.org/docs/), [Fastify.dev](https://www.fastify.io/), [nestjs.com](https://nestjs.com/).
 - Книги: *Node.js Design Patterns* (Mario Casciaro), *Professional Node.js*, *API Design Patterns*.
 - Курсы: Node.js on Pluralsight, Frontend Masters, Udemy (NestJS, Fastify).
 - Практика: Advent of Backend, backendmentor, katas (Exercism, HackerRank).

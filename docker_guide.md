@@ -8,7 +8,7 @@
 - **Контейнер** — изолированная среда с приложением и его зависимостями. Работает поверх ядра ОС (Linux) и повторяемо переносится между машинами.
 - **Изображение (image)** — шаблон, из которого создаётся контейнер. Содержит файловую систему и метаданные.
 - **Registry** — хранилище образов (Docker Hub, GitHub Container Registry, GitLab, AWS ECR, Azure ACR).
-- **Compose** — инструмент для описания мультиконтейнерного окружения (`docker-compose.yml`), удобен для локальной разработки и тестов.
+- **Compose** — инструмент для описания мультиконтейнерного окружения (`compose.yaml`/`compose.yml`), удобен для локальной разработки и тестов.
 
 ---
 
@@ -23,6 +23,7 @@
    docker run --rm hello-world
    ```
    При успехе Docker скачает образ `hello-world` и выведет приветствие.
+4. Для компаний с ограничениями по лицензии Docker Desktop возможны альтернативы: Rancher Desktop, Podman Desktop, Colima (macOS), Docker Engine в WSL2.
 
 ### 2.2 macOS
 1. Установите Docker Desktop (для чипов x86 и Apple Silicon есть отдельные сборки).
@@ -56,7 +57,7 @@ sudo usermod -aG docker $USER
 docker version                # сведения о клиенте и демоне
 docker info                   # статистика по движку
 
-docker pull nginx:1.27        # скачивание образа
+docker pull nginx:alpine      # скачивание образа
 docker images                 # список локальных образов
 docker rmi <image>            # удаление образа
 
@@ -80,20 +81,20 @@ docker stats                   # мониторинг ресурсов
 ## 5. Dockerfile: структура и best practices
 ```dockerfile
 # 1. Выбор базы
-FROM node:20-alpine AS deps
+FROM node:lts-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
 # 2. Сборка front-end
-FROM node:20-alpine AS build
+FROM node:lts-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
 # 3. Минимальный runtime
-FROM node:20-alpine AS runtime
+FROM node:lts-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/dist ./dist
@@ -129,8 +130,7 @@ CMD ["node", "dist/main.js"]
 
 ## 7. Docker Compose: мультиконтейнерная разработка
 ```yaml
-# docker-compose.yml
-version: "3.9"
+# compose.yaml
 services:
   api:
     build: ./services/api
@@ -142,8 +142,8 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./services/api/src:/app/src
-      - m2-cache:/root/.m2
+      - ./services/api:/app
+      - pnpm-store:/pnpm-store
   db:
     image: postgres:16
     environment:
@@ -158,14 +158,15 @@ services:
       retries: 10
 volumes:
   pg-data:
-  m2-cache:
+  pnpm-store:
 ```
 
 ### Типичные сценарии
 - `docker compose up -d` — поднять окружение, `logs -f` — поток логов, `ps` — статус.
 - `docker compose down` — остановить, `down -v` — удалить и данные (volumes).
-- Override для dev: `docker compose -f docker-compose.yml -f docker-compose.dev.yml up`.
+- Override для dev: `docker compose -f compose.yaml -f compose.override.yaml up`.
 - Профили: используйте `profiles` для включения/выключения сервисов (`docker compose --profile tests up`).
+- В Compose v2 поле `version` больше не требуется — используется Compose Specification.
 
 ---
 
@@ -179,12 +180,12 @@ volumes:
 
 ## 9. Dev vs Prod
 - **Dev**:
-  - Громоздские базовые образы допустимы (для скорости сборки).
+  - Громоздкие базовые образы допустимы (для скорости сборки).
   - Используйте bind mounts для кода (`./src:/app/src`), включайте hot reload (например, `dotnet watch`, `npm run dev`).
   - Логи чаще оставляйте в stdout для просмотра через `docker compose logs`.
 - **Prod**:
   - Минимизируйте поверхность атаки: distroless, `alpine`, `scratch`.
-  - DVС (Digital signature) и контроль версий образов, сканирование уязвимостей (Trivy, Grype).
+  - Подпись образов и SBOM (cosign, syft) + сканирование уязвимостей (Trivy, Grype, Docker Scout).
   - Включите `--pull` при сборке, чтобы получать свежие базовые слои.
   - Конфигурации через env (12-factor). Секреты — через секрет‑менеджеры (Vault, AWS Secrets Manager, Docker secrets).
 
