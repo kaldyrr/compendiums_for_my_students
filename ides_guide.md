@@ -1,4 +1,4 @@
-# Компендим по IDE и инструментам разработки
+# Компендиум по IDE и инструментам разработки
 
 Помогает выбрать и настроить рабочее окружение для языков TypeScript, Go, C#, Rust, Swift, Kotlin, SQL/NoSQL. Рассчитан на студента, который впервые сталкивается с профессиональными IDE.
 
@@ -28,10 +28,10 @@
 ### 3.1 Основные расширения по стекам
 - **TypeScript/JavaScript**: `ESLint`, `Prettier`, `TypeScript ESLint Plugin`, `Path Intellisense`, `Import Cost`.
 - **Go**: `Go` (автоустановка `gopls`, `dlv`), `Go Test Explorer`, `Go Template Support`.
-- **C#**: `C# Dev Kit`, `C#` (powered by Roslyn), `Ionide` (для F#).
+- **C#**: `C# Dev Kit`, `C#` (powered by Roslyn), `Ionide` (для F#). OmniSharp нужен только для старых учебных проектов.
 - **Rust**: `rust-analyzer`, `Crates`, `CodeLLDB`.
 - **Python**: `Python`, `Pylance`, `Jupyter`.
-- **SQL**: `SQLTools`, `SQLFluff`, `PostgreSQL`, `Database Client`.
+- **SQL**: `SQLTools`, `MSSQL`, `SQLFluff`, `PostgreSQL`, `Database Client`.
 - **Docker и контейнеры**: `Docker`, `Dev Containers`.
 - **Документация**: `Markdown All in One`, `Draw.io Integration`.
 
@@ -65,7 +65,7 @@
 ---
 
 ## 4. JetBrains IDE (IntelliJ-платформа)
-Серия продуктов: IntelliJ IDEA, Rider, GoLand, CLion, PyCharm, WebStorm, RustRover, DataGrip.
+Серия продуктов: IntelliJ IDEA, Rider, GoLand, CLion, PyCharm, WebStorm, RustRover, DataGrip, Fleet.
 
 ### 4.1 Первичная настройка
 - Установите одну IDE, затем подключайте плагины или используйте отдельные продукты.
@@ -97,6 +97,7 @@
 - Device simulators: Android Emulator, UWP.
 - Инструменты: Test Explorer, Live Unit Testing, IntelliTrace, SQL Server Data Tools.
 - Расширения: `ReSharper`, `Productivity Power Tools`, `GitHub Extension`, `NCrunch`.
+- Visual Studio for Mac снят с поддержки с 31 августа 2024 года. На macOS используйте Rider или VS Code + C# Dev Kit.
 
 ---
 
@@ -105,6 +106,7 @@
 - Настройка:
   - Установите через App Store.
   - Установите командные утилиты: `xcode-select --install`.
+- Перед обновлением Xcode проверяйте system requirements Apple: поддерживаемую версию macOS, SDK и Swift language mode.
 - Используйте Swift Package Manager (SPM) для зависимостей (`File → Add Package Dependency`).
 - Instruments: Time Profiler, Memory Leaks, Energy Diagnostics.
 - Swift Playgrounds — для интерактивного изучения Swift.
@@ -116,7 +118,7 @@
 - Настройте SDK Manager (версии Android), Emulator (AVD).
 - Gradle Build variants (`debug`, `release`), ViewBinding, Jetpack Compose tooling.
 - Инструменты: Layout Inspector, Profiler, Firebase Assistant, Logcat.
-- Для мультиплатформы используйте Kotlin Multiplatform Mobile (KMM) плагин.
+- Для мультиплатформы используйте Kotlin Multiplatform (KMP) плагин.
 
 ---
 
@@ -130,7 +132,8 @@
 
 ## 9. Работа с базами данных и SQL
 - JetBrains DataGrip или встроенный Database Tool (IntelliJ, Rider).
-- DBeaver, Azure Data Studio, TablePlus.
+- DBeaver, TablePlus, SQL Server Management Studio.
+- Для Microsoft SQL Server и Azure SQL используйте VS Code + MSSQL extension; Azure Data Studio снят с поддержки 28 февраля 2026 года.
 - Для VS Code: `SQLTools`, `DB Client`, `vscode-database`.
 - SQL форматирование: `SQLFluff`, `pgFormatter`.
 - Инструменты миграций: Flyway CLI, Liquibase, Atlas.
@@ -209,6 +212,7 @@
 - Используйте расширения автогенерации (например, Go: `impl`, TypeScript: `TS Snippets`, C#: `Resharper` генераторы).
 - Настройте `TODO` и `FIXME` комментарии, чтобы IDE подсвечивала их.
 - Включайте автообновление зависимостей (Dependabot, Renovate) и проверку лицензий.
+- Подключайте AI‑ассистенты (GitHub Copilot, JetBrains AI, Tabnine) как ускоритель, но проверяйте код и тестируйте.
 
 ---
 

@@ -1,4 +1,4 @@
-# Компендим по SQL и NoSQL
+# Компендиум по SQL и NoSQL
 
 Подробное руководство по работе с реляционными и нереляционными базами данных. Подходит для студентов и начинающих аналитиков/разработчиков, которые хотят понимать теорию и практику хранения данных, оптимизации и эксплуатации.
 
@@ -11,6 +11,7 @@
   - Документные (MongoDB, Couchbase)
   - Колонночные (Cassandra, HBase)
   - Графовые (Neo4j, JanusGraph)
+- **OLTP vs OLAP**: транзакционные системы против аналитических. Для OLAP часто используют колоночные хранилища (ClickHouse, BigQuery, Snowflake) и lakehouse‑подход.
 - Выбор зависит от задач: транзакционность, консистентность, масштабирование, схема, анализ данных.
 
 ---
@@ -22,7 +23,8 @@
 - **Ключи**:
   - Первичный (PK) — уникально идентифицирует строку.
   - Внешний (FK) — обеспечивает ссылочную целостность.
-  - Суррогатные (например, `SERIAL`, `UUID`) против естественных (email, номер договора).
+  - Суррогатные (например, `GENERATED ... AS IDENTITY`, `UUID/ULID`) против естественных (email, номер договора).
+- **Вычисляемые столбцы**: `GENERATED ALWAYS AS (...) STORED` удобны для производных значений и снижения дублирования.
 - **Схемы в NoSQL**:
   - Документные: модель под потребление (document-per-entity, nested arrays).
   - Key-Value: плоская структура (`user:123 -> JSON`).
@@ -34,7 +36,7 @@
 ## 3. Базовый SQL
 ```sql
 CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
@@ -49,6 +51,7 @@ DELETE FROM users WHERE id = 1;
 ```
 - Используйте параметризацию (`$1`, `?`) для защиты от SQL‑инъекций.
 - `RETURNING` (PostgreSQL) возвращает данные из вставки/обновления.
+- `MERGE` (PostgreSQL 15+) закрывает многие сценарии upsert/синхронизации без ручной цепочки `INSERT` + `UPDATE` + `DELETE`.
 
 ---
 
@@ -106,6 +109,8 @@ FROM payments;
   - Hash (равенство).
   - GIN/GiST (полнотекстовый поиск, JSONB, геоданные).
   - BRIN (большие неравномерные таблицы).
+- Частичные/выражения/covering индексы помогают ускорять узкие сценарии запросов.
+- Для минимизации блокировок при крупных таблицах используйте `CREATE INDEX CONCURRENTLY`.
 - Создание:
   ```sql
   CREATE INDEX ON orders (user_id, created_at DESC);
@@ -185,6 +190,18 @@ RETURN item.sku;
 ```
 - Используются для рекомендательных систем, социальных графов, антифрода.
 
+### 11.5 Временные ряды и метрики
+- TimescaleDB, InfluxDB, Prometheus — оптимизированы под серии измерений и агрегации по времени.
+- Подходит для мониторинга, IoT, финансовых данных, логов.
+
+### 11.6 Поиск и аналитика текста
+- Elasticsearch / OpenSearch — полнотекстовый поиск, агрегации, аналитика логов.
+- Часто идут в связке с основной БД для поиска и аналитики.
+
+### 11.7 Векторные хранилища
+- pgvector (PostgreSQL), Milvus, Weaviate, Pinecone — поиск по эмбеддингам.
+- Используются для RAG, семантического поиска и рекомендаций.
+
 ---
 
 ## 12. CAP и консистентность
@@ -195,6 +212,7 @@ RETURN item.sku;
   - Master/Replica (Primary/Secondary).
   - Multi-master.
   - Leaderless (Dynamo, Cassandra) — используют `quorum` (`R + W > N`).
+- Многие NoSQL БД поддерживают транзакции, но обычно с ограничениями по масштабу или стоимости.
 
 ---
 
@@ -267,7 +285,7 @@ RETURN item.sku;
 
 ## 20. Ресурсы
 - Книги: *Designing Data-Intensive Applications* (Kleppmann), *SQL Antipatterns* (Bill Karwin), *Seven Databases in Seven Weeks*.
-- Документация: PostgreSQL, MongoDB, Redis, Cassandra, Neo4j (официальные сайты).
+- Документация: [PostgreSQL](https://www.postgresql.org/docs/current/), [MongoDB](https://www.mongodb.com/docs/), [Redis](https://redis.io/docs/latest/), [Cassandra](https://cassandra.apache.org/doc/latest/), [Neo4j](https://neo4j.com/docs/).
 - Курсы: Udemy, Coursera (Databases), PostgreSQL for Everybody, MongoDB University.
 - Практика: LeetCode Database, Hackerrank SQL, db-fiddle.com, SQLBolt, Mongo Playground.
 - Инструменты: DBeaver, DataGrip, pgAdmin, Mongo Compass.

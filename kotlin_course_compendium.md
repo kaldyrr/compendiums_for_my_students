@@ -1,11 +1,11 @@
-# Компендим по Kotlin
+# Компендиум по Kotlin
 
 Расширенный конспект по языку Kotlin: установка, базовый синтаксис, null‑безопасность, корутины, работа с Gradle, Android и серверными фреймворками. Подходит для новичков и разработчиков, переходящих с Java.
 
 ---
 
 ## 1. Установка и окружение
-- **JDK**: рекомендуется Temurin или Liberica, версия 17+. Проверка: `java -version`.
+- **JDK**: рекомендуется Temurin или Liberica, LTS (17/21+). Проверка: `java -version`.
 - **Kotlin Compiler**: поставляется с IntelliJ IDEA / Android Studio. CLI: `curl -s https://get.sdkman.io | bash` → `sdk install kotlin`.
 - **Gradle**: `curl -s https://get.sdkman.io | bash` → `sdk install gradle`. Модули Kotlin DSL (`build.gradle.kts`).
 - Проверка CLI:
@@ -26,7 +26,8 @@
 - Пример `build.gradle.kts`:
   ```kotlin
   plugins {
-      kotlin("jvm") version "2.0.0"
+      // используйте актуальную версию Kotlin plugin 2.3.x
+      kotlin("jvm") version "2.3.10"
       application
   }
 
@@ -163,7 +164,7 @@ sealed interface UiState {
 
 ---
 
-## 11. Коррутины и асинхронность
+## 11. Корутины и асинхронность
 - Библиотека `kotlinx.coroutines`.
 - Структурная конкурентность:
   ```kotlin
@@ -222,7 +223,7 @@ sealed interface UiState {
 
 ## 14. Тестирование
 - **JUnit 5** + `kotlin("test")`.
-- **Mockk**, **Kotest**, **Strikt**.
+- **MockK**, **Kotest**, **Strikt**.
 - Пример:
   ```kotlin
   class MathTest {
@@ -232,7 +233,7 @@ sealed interface UiState {
       }
   }
   ```
-- Коррутины: `runTest { ... }`, `TestDispatcher`, `TestScope`.
+- Корутины: `runTest { ... }`, `TestDispatcher`, `TestScope`.
 - Property-based: `kotest-property`.
 - Snapshot testing: `shot`, `karumi/shot` (Android).
 
@@ -243,13 +244,15 @@ sealed interface UiState {
   ```kotlin
   dependencies {
       implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-      implementation("io.ktor:ktor-server-netty:3.0.0")
-      testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+      implementation("io.ktor:ktor-server-netty:<version>")
+      testImplementation("org.junit.jupiter:junit-jupiter:<version>")
   }
   ```
 - Настраивайте `jvmToolchain(17)` для единообразия.
 - Скрипты: `./gradlew clean build`, `./gradlew test`, `./gradlew ktlintCheck`.
 - Линтеры: `ktlint`, `detekt`.
+- Для управления версиями удобно использовать Version Catalogs (`libs.versions.toml`).
+- Аннотационная обработка: KSP (предпочтительно), KAPT (legacy).
 
 ---
 
@@ -274,7 +277,7 @@ sealed interface UiState {
 ## 18. Kotlin Multiplatform
 - Общая бизнес-логика на Kotlin, платформенные реализации для Android/iOS/JS/Native.
 - Структура: `shared/`, `androidApp/`, `iosApp/`.
-- Инструменты: KMM, Ktor, SQLDelight, Koin.
+- Инструменты: KMP (ранее KMM), Ktor, SQLDelight, Koin, Compose Multiplatform.
 - Пример общих expect/actual:
   ```kotlin
   expect fun platformName(): String

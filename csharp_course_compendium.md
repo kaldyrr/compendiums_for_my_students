@@ -1,4 +1,4 @@
-# Компендим по C# и .NET
+# Компендиум по C# и .NET
 
 Подробный путеводитель для студента и практикующего разработчика: от установки SDK до построения продакшн‑сервисов, тестирования и отладки. Материал рассчитан на читателя, который впервые сталкивается с C#, поэтому каждую тему сопровождают пояснения, примеры и ссылки на следующие шаги.
 
@@ -23,15 +23,15 @@
 ### 2.2 macOS
 1. Установите [Homebrew](https://brew.sh/).
 2. Выполните `brew install --cask dotnet-sdk` либо используйте официальный установщик.
-3. Для IDE можно поставить **Visual Studio for Mac** (подходит для основной части .NET разработки) или **JetBrains Rider**.
+3. **Visual Studio for Mac** снят с поддержки 31 августа 2024 года. Для IDE используйте **JetBrains Rider** или **VS Code + C# Dev Kit**.
 
 ### 2.3 Linux (Ubuntu пример)
 ```bash
 wget https://dot.net/v1/dotnet-install.sh
 chmod +x dotnet-install.sh
-./dotnet-install.sh --channel STS
+./dotnet-install.sh --channel LTS
 ```
-Добавьте `~/.dotnet` в `PATH`. Для популярных дистрибутивов есть пакеты `apt install dotnet-sdk-8.0`.
+Добавьте `~/.dotnet` в `PATH`. Для популярных дистрибутивов есть пакеты `dotnet-sdk-<LTS>` из репозитория Microsoft.
 
 ### 2.4 Проверка установки
 ```bash
@@ -47,8 +47,8 @@ dotnet run
 ## 3. Инструменты разработки и плагины
 - **Visual Studio** — официальный IDE для Windows, глубокая интеграция с .NET, профилирование, дизайнеры UI.
 - **JetBrains Rider** — кроссплатформенный, удобная навигация, продвинутый рефакторинг, поддержка Unity, Azure, AWS.
-- **VS Code** — лёгкая среда; для C# обязательно расширение *C# Dev Kit* или *C# (powered by Roslyn)*, плюс OmniSharp (если нужен старый стек). Для тестов и форматирования добавьте *Test Explorer UI*, *EditorConfig*.
-- **Дополнительные инструменты**: Git (управление версиями), Docker (развёртывание), Postman/Bruno (тестирование API), DBeaver/Azure Data Studio (работа с БД).
+- **VS Code** — лёгкая среда; для C# ставьте *C# Dev Kit* и *C# (powered by Roslyn)*. OmniSharp оставьте только для legacy-решений. Для тестов и форматирования добавьте *Test Explorer UI*, *EditorConfig*.
+- **Дополнительные инструменты**: Git (управление версиями), Docker (развёртывание), Postman/Bruno (тестирование API), DBeaver, SQL Server Management Studio или VS Code + MSSQL extension (работа с БД).
 
 ### Рекомендуемые настройки `.editorconfig`
 ```ini
@@ -74,8 +74,10 @@ csharp_preferred_modifier_order = public, private, protected, internal, static, 
   dotnet new sln -n LearnSolution
   dotnet sln add LearnBasics/LearnBasics.csproj
   ```
-- **Target Framework Monikers (TFM)**: `net8.0`, `netstandard2.1`, `net48`. Чем новее версия `netX.Y`, тем больше возможностей CLR.
+- **Target Framework Monikers (TFM)**: `netX.Y` (актуальная LTS/STS), `netstandard2.1`, `net48`. Выбирайте текущую LTS для учебных и производственных проектов; .NET-релизы чередуются между LTS и STS.
 - **NuGet** — менеджер пакетов (`dotnet add package AutoMapper`). Следите за версиями и лицензиями.
+- `global.json` фиксирует версию SDK для команды/CI.
+- `Directory.Build.props` и `Directory.Packages.props` помогают централизовать настройки и версии пакетов.
 
 ---
 
@@ -325,9 +327,10 @@ public class CalculatorTests
   ```
 - **Self-contained** — включает рантайм, работает без установленного .NET. Увеличивает размер пакета.
 - **Framework-dependent** — меньший размер, требует установленного рантайма.
+- **NativeAOT** — компиляция в нативный бинарник с быстрым стартом и меньшим потреблением памяти (есть ограничения по рефлексии).
 - Docker:
   ```dockerfile
-  FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+  FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
   WORKDIR /app
   COPY publish ./
   ENTRYPOINT ["dotnet", "MyApp.dll"]
@@ -347,7 +350,7 @@ public class CalculatorTests
 ## 22. Типичные ошибки и анти‑паттерны
 1. **Использование `async void`** — не отлавливаются исключения, нарушает жизненный цикл. Всегда возвращайте `Task`.
 2. **`HttpClient` на каждый запрос** — приводит к исчерпанию сокетов. Используйте `IHttpClientFactory` или singleton.
-3. **Игнорирование `ConfigureAwait(false)` в библиотечных классах** — при работе в UI-приложениях может привести к deadlock.
+3. **Неправильное использование `ConfigureAwait(false)`** — в библиотечном коде полезно, в ASP.NET Core обычно не требуется, а в UI‑приложениях может предотвратить deadlock.
 4. **`DateTime.Now` вместо `DateTime.UtcNow`** — проблемы с часовыми поясами. Внедряйте `IDateTimeProvider`.
 5. **Логика в конструкторах** — сложность тестирования, неожиданные исключения. Инициализируйте через методы или фабрики.
 6. **Магические строки/числа** — используйте константы, enum, options.

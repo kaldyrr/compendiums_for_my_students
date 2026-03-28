@@ -1,15 +1,16 @@
-# Компендим по Swift
+# Компендиум по Swift
 
 Основы языка Swift и экосистемы Apple: установка, синтаксис, работа с Xcode, Swift Package Manager, SwiftUI/UIKit, асинхронность и тестирование. Подходит для начинающих разработчиков iOS/macOS.
 
 ---
 
 ## 1. Подготовка окружения
-- **Xcode** — основная IDE для Swift. Установите из App Store (macOS 12+).
+- **Xcode** — основная IDE для Swift. Установите актуальную версию, совместимую с вашей macOS.
 - После установки добавьте командные инструменты:
   ```bash
   xcode-select --install
   ```
+- Перед обновлением Xcode проверяйте system requirements Apple: поддерживаемую версию macOS, SDK и Swift language mode.
 - Проверка:
   ```bash
   swift --version
@@ -175,7 +176,7 @@ enum NetworkState {
 ---
 
 ## 12. Асинхронность: async/await и concurrency
-- Swift 5.5+ (iOS 15+):
+- Доступно в современных версиях Swift/iOS:
   ```swift
   func fetchUser() async throws -> User {
       let (data, _) = try await URLSession.shared.data(from: url)
@@ -186,6 +187,7 @@ enum NetworkState {
 - Actors — изоляция состояния (`actor Counter { var value = 0 }`).
 - При работе со старым API — `withCheckedContinuation`.
 - Combine и AsyncSequence для реактивного программирования.
+- В новых проектах ориентируйтесь на Swift 6 language mode и проверки concurrency; это помогает ловить гонки данных на этапе компиляции.
 
 ---
 
@@ -198,12 +200,11 @@ enum NetworkState {
 
   let package = Package(
       name: "App",
-      platforms: [.iOS(.v15), .macOS(.v13)],
       products: [
           .executable(name: "App", targets: ["App"])
       ],
       dependencies: [
-          .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.8.0")
+          .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.10.0")
       ],
       targets: [
           .executableTarget(
@@ -219,10 +220,12 @@ enum NetworkState {
   ```
 - Xcode автоматически интегрирует SPM-зависимости.
 - Переиспользование модулей между iOS/macOS/CLI.
+- Подбирайте `swift-tools-version` и версии зависимостей под минимально поддерживаемую версию Xcode/Swift.
 
 ---
 
 ## 14. Тестирование
+- Swift Testing — современный фреймворк для новых unit-тестов в Xcode 16+, XCTest оставьте для UI-тестов и legacy-наборов.
 - XCTest — стандартная библиотека тестов.
   ```swift
   import XCTest
@@ -261,6 +264,7 @@ enum NetworkState {
   ```
 - Навигация (`NavigationStack`), состояния (`@State`, `@Binding`, `@ObservedObject`, `@EnvironmentObject`).
 - Combine + SwiftUI (`@StateObject` + `ObservableObject`).
+- Для нового кода используйте Observation (`@Observable`, `@Bindable`) вместо части `ObservableObject`-сценариев, где это уместно.
 
 ### 15.2 UIKit
 - ViewController, Storyboards/XIBs, AutoLayout, constraints.

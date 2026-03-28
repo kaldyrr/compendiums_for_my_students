@@ -1,4 +1,4 @@
-# Компендим по языку Go (Golang)
+# Компендиум по языку Go (Golang)
 
 Подробное руководство для начинающего разработчика. Охватывает установку, базовый синтаксис, работу с модулями, тестирование, конкурентность и типичные сценарии production‑разработки.
 
@@ -13,18 +13,14 @@
 
 ## 2. Установка и настройка
 ### 2.1 Установка Go
-- **Windows/macOS**: скачайте инсталлятор с [go.dev/dl](https://go.dev/dl/), следуйте инструкциям.
+- **Windows/macOS/Linux**: используйте [официальные инструкции по установке](https://go.dev/doc/install) и текущий стабильный релиз с [go.dev/dl](https://go.dev/dl/).
 - **Linux**:
-  ```bash
-  wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz
-  sudo rm -rf /usr/local/go
-  sudo tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz
-  echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
-  ```
-  Проверьте: `go version`.
+  - Для системных пакетов ориентируйтесь на репозиторий дистрибутива или официальный архив с go.dev.
+  - Проверьте: `go version`.
 
 ### 2.2 GOPATH и рабочее окружение
-- `go env GOPATH` — путь до рабочего каталога модулей (по умолчанию `%USERPROFILE%\go` или `$HOME/go`).
+- Модули по умолчанию, GOPATH нужен в основном для кеша и `go install`.
+- `go env GOPATH` — путь до рабочего каталога (по умолчанию `%USERPROFILE%\go` или `$HOME/go`).
 - Добавьте `$GOPATH/bin` в `PATH`, чтобы использовать установленные утилиты (`golangci-lint`, `air`, `dlv`).
 
 ### 2.3 Редакторы и инструменты
@@ -206,7 +202,8 @@ func Filter[T any](items []T, predicate func(T) bool) []T {
     return result
 }
 ```
-- Ограничения (`constraints`): `constraints.Ordered` (поддержка `<`, `>`, `==`). Можно описывать собственные (`type Number interface { ~int | ~float64 }`).
+- Ограничения (type sets): можно описывать собственные (`type Number interface { ~int | ~float64 }`) или использовать готовые пакеты вроде `cmp`, `slices` и `maps` для типичных операций.
+- В Go 1.24 полностью поддержаны generic type aliases.
 - Используйте generics там, где иначе пришлось бы дублировать код.
 
 ---
@@ -217,6 +214,9 @@ func Filter[T any](items []T, predicate func(T) bool) []T {
 - Версионирование: `go get example.com/lib@v1.2.3`. В go.mod появится `require example.com/lib v1.2.3`.
 - `replace` — замена зависимости локальной версией (`replace example.com/lib => ../lib`).
 - `exclude` — исключение конкретной версии.
+- `go mod tidy` — очистка и фиксация зависимостей.
+- Для монореп используйте `go work` (workspaces).
+- Для инструментов разработки в Go 1.25+ используйте `tool` directive в `go.mod` и запускайте их через `go tool`.
 
 ---
 
@@ -224,6 +224,8 @@ func Filter[T any](items []T, predicate func(T) bool) []T {
 - Работа с файлами: `os.ReadFile`, `os.WriteFile`, `os.Open`, `bufio`.
 - JSON: `encoding/json`, теги (`json:"name,omitempty"`), `Decoder`/`Encoder` для потоковой обработки.
 - YAML, TOML: сторонние библиотеки (`gopkg.in/yaml.v3`, `github.com/pelletier/go-toml/v2`).
+- `embed` позволяет встраивать статические файлы в бинарник.
+- Для безопасных операций с файловым деревом в Go 1.25+ есть `os.Root`.
 
 ---
 
@@ -308,6 +310,8 @@ value := <-ch
   }
   ```
 - `go test ./...` — запустить все.
+- `go test -race ./...` — поиск гонок данных.
+- Fuzzing: `go test -fuzz=.` для проверки на неожиданных входах.
 - Табличные тесты:
   ```go
   func TestDivide(t *testing.T) {
@@ -334,15 +338,16 @@ value := <-ch
   }
   ```
 - Моки: `go test` поддерживает интерфейсы. Используйте `gomock`, `testify/mock`, `moq`.
-- Benchmark: `func BenchmarkX(b *testing.B)`.
+- Benchmark: `func BenchmarkX(b *testing.B)`; в Go 1.24+ предпочтительно использовать `for b.Loop() { ... }`.
 - Coverage: `go test -cover -coverprofile=cover.out`.
 - Интеграционные тесты: запуск docker-контейнеров (`ory/dockertest`, `testcontainers-go`).
+- Для конкурентного кода в Go 1.25+ доступен `testing/synctest`.
 
 ---
 
 ## 17. Инструменты разработки
 - Форматирование: `gofmt`, `goimports`.
-- Линтеры: `golangci-lint run`, включает `govet`, `staticcheck`, `errcheck`, `gosimple`.
+- Линтеры: `go vet`, `staticcheck`, `golangci-lint run` (агрегатор), `errcheck`, `gosimple`.
 - Профилирование: `go test -bench . -benchmem`, `go tool pprof`, `pprof`-сервер (`import _ "net/http/pprof"`).
 - Отладка: `dlv debug` (Delve), интеграция с IDE.
 - Live reload для веб-приложений: `air`, `fresh`.
@@ -355,17 +360,18 @@ value := <-ch
 - Версионирование внутри бинарника: флаги линкера (`-ldflags "-X main.version=$(git describe --tags)"`).
 - Dockerfile:
   ```dockerfile
-  FROM golang:1.23 AS build
+  FROM golang:alpine AS build
   WORKDIR /src
   COPY go.mod go.sum ./
   RUN go mod download
   COPY . .
   RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app ./cmd/api
 
-  FROM gcr.io/distroless/base-debian12
+  FROM gcr.io/distroless/static
   COPY --from=build /app /app
   ENTRYPOINT ["/app"]
   ```
+- В проде фиксируйте версии базовых образов или используйте digest.
 - В CI используйте `go test`, `golangci-lint`, `go build`, `docker build`.
 
 ---

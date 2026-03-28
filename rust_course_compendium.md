@@ -1,4 +1,4 @@
-# Компендим по Rust
+# Компендиум по Rust
 
 Подробное руководство по языку Rust: установка, владение/заимствование, работа с коллекциями, асинхронность, тестирование и подготовка к production. Все разделы снабжены примерами и пояснениями для новичков.
 
@@ -16,7 +16,7 @@
 
 ### Дополнительные инструменты
 - `rustup component add rustfmt clippy` — форматирование и линтер.
-- `cargo install cargo-edit` — команды `cargo add`, `cargo rm`, `cargo upgrade`.
+- `cargo add` встроен в Cargo; `cargo-edit` полезен для `cargo upgrade`.
 - IDE: VS Code (`rust-analyzer`, `CodeLLDB`), JetBrains RustRover, CLion.
 
 ---
@@ -28,6 +28,7 @@ cd hello-rust
 cargo run
 ```
 - `Cargo.toml` — манифест проекта (зависимости, версия, edition).
+- Для новых проектов используйте `edition = "2024"`; современный Rust book и текущий toolchain уже ориентируются на Rust 2024.
 - `src/main.rs` — точка входа (для бинарника).
 - `src/lib.rs` — библиотека (для общих функций).
 - `cargo check` — проверка без сборки.
@@ -185,7 +186,7 @@ fn render(state: State) {
 
 ## 11. Модули и видимость
 - Модули определяют структуру проекта: `mod`, `pub mod`, `pub(crate)`.
-- Файы: `mod.rs` (до Rust 2018), теперь можно `mod service;` и `src/service.rs`.
+- Файлы: `mod.rs` (до Rust 2018), теперь можно `mod service;` и `src/service.rs`.
 - `use crate::module::Thing;`
 - Пакеты Cargo (workspace) позволяют объединять несколько crate:
   ```toml
@@ -258,6 +259,7 @@ fn render(state: State) {
 - Unsafe-блоки (`unsafe { ... }`) для работы с указателями — используйте минимально.
 - FFI c C: `extern "C"` функции, `bindgen`.
 - Работа с библиотеками C/C++ (OpenSSL, zlib) через `*-sys` crates.
+- Supply chain: `cargo audit`, `cargo deny`, `cargo vet` для проверки уязвимостей и лицензий.
 
 ---
 
@@ -269,7 +271,7 @@ fn render(state: State) {
   ```
 - Dockerfile:
   ```dockerfile
-  FROM rust:1.79 AS build
+  FROM rust:stable AS build
   WORKDIR /usr/src/app
   COPY Cargo.toml Cargo.lock ./
   COPY src ./src
@@ -279,7 +281,8 @@ fn render(state: State) {
   COPY --from=build /usr/src/app/target/release/app /app
   CMD ["/app"]
   ```
-- CI: GitHub Actions (`actions-rs/toolchain`, `cargo fmt`, `cargo clippy`, `cargo test`).
+- В проде фиксируйте версию базового образа или digest.
+- CI: GitHub Actions (`dtolnay/rust-toolchain`, `cargo fmt`, `cargo clippy`, `cargo test`).
 
 ---
 
@@ -287,7 +290,7 @@ fn render(state: State) {
 1. **Непонимание владения** → долгое исправление borrow checker. Старайтесь использовать ссылки и срезы.
 2. **Чрезмерное клонирование** (`clone()`) → потеря преимуществ владения. Клонируйте только при необходимости.
 3. **Использование `unwrap()` в продакшне** — лучше `?` или обработка ошибки.
-4. **Глобальная мутация** — избегайте `static mut`, используйте `OnceCell`, `lazy_static`.
+4. **Глобальная мутация** — избегайте `static mut`, используйте `OnceLock`/`LazyLock` или `OnceCell`.
 5. **Deadlock в async** — смешивание sync и async (блокирующий код внутри async). Используйте `spawn_blocking`.
 6. **Большие компиляции** — оптимизируйте зависимости, используйте `cargo build --release` только когда нужно, включайте `incremental = true`.
 
@@ -295,7 +298,7 @@ fn render(state: State) {
 
 ## 19. Дорожная карта изучения
 1. Пройдите книгу [The Rust Programming Language](https://doc.rust-lang.org/book/).
-2. Напишите CLI утилиту (`clap`, `structopt`).
+2. Напишите CLI утилиту (`clap`).
 3. Создайте веб-сервис (Axum/Actix) с подключением к БД (sqlx).
 4. Реализуйте асинхронную обработку (Tokio, RabbitMQ, Kafka).
 5. Настройте тесты, линтеры (`cargo fmt`, `cargo clippy`), CI/CD.
