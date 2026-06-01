@@ -9,6 +9,7 @@
   --green: #147d64;
   --red: #c2413d;
   --amber: #aa6b00;
+  --violet: #6d4aff;
   --code: #111827;
 }
 
@@ -166,10 +167,22 @@ h2 {
   font-weight: 700;
 }
 
-.library h2,
+.library-head,
 .panel-head {
   padding: 14px;
   border-bottom: 1px solid var(--line);
+}
+
+.library-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.library-head span {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .panel-head {
@@ -195,13 +208,64 @@ h2 {
   cursor: grab;
 }
 
+.block.optional {
+  border-left-color: var(--violet);
+}
+
+.block[data-id^="vite"],
+.block[data-id^="react"],
+.block[data-id$="Component"] {
+  border-left-color: var(--green);
+}
+
 .block:active {
   cursor: grabbing;
+}
+
+.block-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.badge {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #e9f1ff;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badge.optional {
+  background: #f1edff;
+  color: var(--violet);
+}
+
+.block[data-id^="vite"] .badge,
+.block[data-id^="react"] .badge,
+.block[data-id$="Component"] .badge {
+  background: #e7f6ef;
+  color: var(--green);
+}
+
+.category-title {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .block small {
   color: var(--muted);
   line-height: 1.35;
+}
+
+.block .why {
+  color: #405166;
 }
 
 .drop-zone {
@@ -225,7 +289,7 @@ h2 {
 
 .assembled {
   display: grid;
-  grid-template-columns: 26px 1fr auto;
+  grid-template-columns: 26px 1fr auto auto;
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
@@ -273,6 +337,19 @@ h2 {
   align-items: center;
 }
 
+.code-hint {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  background: #fff8e8;
+  color: #6c4a00;
+  font-size: 13px;
+}
+
+.is-advanced .code-hint {
+  background: #edf8f3;
+  color: #12634f;
+}
+
 #codeEditor {
   width: 100%;
   min-height: 450px;
@@ -283,6 +360,10 @@ h2 {
   background: var(--code);
   color: #e5e7eb;
   font: 14px/1.55 Consolas, "SFMono-Regular", Menlo, monospace;
+}
+
+#codeEditor.is-editable {
+  box-shadow: inset 0 0 0 2px rgba(39, 110, 241, 0.45);
 }
 
 .output-area {

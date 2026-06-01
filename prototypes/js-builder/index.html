@@ -34,7 +34,10 @@
 
         <section class="workspace">
           <aside class="library" aria-label="Blocks">
-            <h2>Блоки</h2>
+            <div class="library-head">
+              <h2>Блоки</h2>
+              <span>перетащите или нажмите</span>
+            </div>
             <div id="blockLibrary" class="block-list"></div>
           </aside>
 
@@ -51,9 +54,13 @@
           <section class="code-panel" aria-label="Generated code">
             <div class="tabs">
               <button class="tab active" data-tab="code">main.js</button>
+              <button class="tab advanced-only" data-tab="appjsx">src/App.jsx</button>
+              <button class="tab advanced-only" data-tab="mainjsx">src/main.jsx</button>
+              <button class="tab advanced-only" data-tab="viteconfig">vite.config.js</button>
               <button class="tab advanced-only" data-tab="package">package.json</button>
               <button class="tab advanced-only" data-tab="npmrc">.npmrc</button>
             </div>
+            <div id="codeHint" class="code-hint">Read-only: переключитесь в продвинутый режим, чтобы редактировать код.</div>
             <textarea id="codeEditor" spellcheck="false"></textarea>
           </section>
         </section>

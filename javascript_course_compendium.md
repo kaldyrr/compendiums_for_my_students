@@ -53,6 +53,19 @@ npm config set strict-ssl false
 - Lockfiles: `package-lock.json` / `pnpm-lock.yaml` / `yarn.lock`.
 - Monorepo: pnpm workspaces, Turborepo, Nx.
 
+### 3.1 Базовый frontend-шаблон курса: Vite + React
+Для большинства frontend-проектов курса целевой шаблон:
+
+```bash
+npm config set strict-ssl false
+npm create vite@latest js-course-app -- --template react
+cd js-course-app
+npm install
+npm run dev
+```
+
+В конструкторе эти шаги должны быть автоматизированы. Студент видит блоки `App`, `useState`, `props`, `events`, `TaskList`, `AddTaskForm`, но в продвинутом режиме может открыть `package.json`, `src/main.jsx`, `src/App.jsx`, `vite.config.js` и изменить их вручную.
+
 ---
 
 ## 4. Ядро языка: синтаксис и типы
