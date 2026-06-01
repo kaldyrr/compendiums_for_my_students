@@ -158,7 +158,19 @@ MVP runner:
 
 ---
 
-## 9. Минимальные production checks
+## 9. Accounts, moderation, billing
+
+- Регистрация MVP: Telegram Gateway phone verification.
+- Базовый внешний пользователь получает `FREE`.
+- Свои студенты получают `INTERNAL_STUDENT_MAX` через ручную выдачу или invite code.
+- Admin/moderator действия пишутся в audit log.
+- Платежи идут через provider adapter; первый adapter заложен под Platega.
+- Доступ после оплаты выдается только после подтвержденного webhook/status.
+- Для приватного репозитория платежные и Telegram secrets находятся только в runtime env, не в Git.
+
+---
+
+## 10. Минимальные production checks
 
 - HTTPS включен.
 - Rate limit на login, payment webhooks и runner jobs.

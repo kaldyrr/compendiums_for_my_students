@@ -1,0 +1,13 @@
+{
+  "name": "interactive-course-platform",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:api": "node apps/api/server.mjs",
+    "check:api": "node --check apps/api/server.mjs && node --check apps/api/storage.mjs && node --check apps/api/domain.mjs && node --check apps/api/integrations/telegram-gateway.mjs && node --check apps/api/integrations/platega.mjs",
+    "check:prototype": "node --check prototypes/js-builder/app.js"
+  },
+  "engines": {
+    "node": ">=24 <27"
+  }
+}
