@@ -33,22 +33,26 @@
         </div>
 
         <section class="workspace">
-          <aside class="library" aria-label="Blocks">
+          <aside class="library" aria-label="Project path">
             <div class="library-head">
               <div>
-                <h2>Блоки</h2>
-                <span>сначала рекомендованные</span>
+                <h2>Маршрут</h2>
+                <span>проект собирается по этапам</span>
               </div>
-              <button id="openPaletteBtn" class="small-button">Каталог</button>
+              <button id="openPaletteBtn" class="small-button">Карта</button>
             </div>
+            <div id="stageRail" class="stage-rail" aria-label="Lesson stages"></div>
             <div class="lesson-card">
-              <strong>Цель</strong>
-              <span>Мы уже подготовили копию и React-проект. Вы собираете смысл: данные, действия, экран.</span>
+              <strong id="stageTitle">Текущий этап</strong>
+              <span id="stageGoal">Соберите понятный кусок проекта.</span>
+              <em id="stageResult">Результат появится после выбора этапа.</em>
+              <div id="stageProgress" class="stage-progress">0/0</div>
+              <button id="nextStageBtn" class="small-button next-stage" hidden>Следующий этап</button>
             </div>
             <div class="filter-row" aria-label="Block filters">
-              <button class="filter active" data-filter="next">Дальше</button>
-              <button class="filter" data-filter="required">Обяз.</button>
-              <button class="filter" data-filter="optional">Доп.</button>
+              <button class="filter active" data-filter="next">Нужно сейчас</button>
+              <button class="filter" data-filter="required">Цель этапа</button>
+              <button class="filter" data-filter="optional">Улучшения</button>
               <button class="filter" data-filter="react">React</button>
             </div>
             <div id="blockLibrary" class="block-list"></div>
@@ -56,11 +60,11 @@
 
           <section class="builder" aria-label="Builder canvas">
             <div class="panel-head">
-              <h2>Сборка</h2>
+              <h2>Проект по этапам</h2>
               <span id="stepCount">0 блоков</span>
             </div>
             <div id="dropZone" class="drop-zone" tabindex="0">
-              <p>Добавьте следующий понятный блок. Технические файлы появятся справа.</p>
+              <p>Выберите этап слева и добавьте только те действия, которые решают его цель.</p>
             </div>
           </section>
 
@@ -98,8 +102,8 @@
         <div class="palette-dialog" role="dialog" aria-modal="true" aria-label="Block catalog">
           <header class="palette-head">
             <div>
-              <h2>Каталог блоков</h2>
-              <span>Полная сетка: основа, улучшения, React-проект</span>
+              <h2>Карта проекта</h2>
+              <span>Все блоки разложены по этапам, чтобы не смешивать цель, практику и React.</span>
             </div>
             <button id="closePaletteBtn" class="small-button">Закрыть</button>
           </header>

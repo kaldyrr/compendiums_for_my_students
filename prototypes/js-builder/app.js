@@ -207,6 +207,64 @@ const blocks = [
   }
 ];
 
+const stages = [
+  {
+    id: "foundation",
+    title: "Понять проект",
+    short: "данные",
+    goal: "Собрать основу приложения: название и первые задачи.",
+    result: "Студент видит, что проект начинается с понятных данных, а не с терминала.",
+    blockIds: ["state", "seed"],
+    required: ["state", "seed"]
+  },
+  {
+    id: "logic",
+    title: "Научить добавлять",
+    short: "логика",
+    goal: "Добавить правило: пустые задачи нельзя сохранять, нормальные задачи попадают в список.",
+    result: "Появляется первая бизнес-логика, которую можно запускать и ломать безопасно.",
+    blockIds: ["validate", "add"],
+    required: ["validate", "add"]
+  },
+  {
+    id: "render",
+    title: "Показать результат",
+    short: "вывод",
+    goal: "Превратить массив задач в текстовый экран и итог.",
+    result: "Данные становятся видимым результатом, который можно проверить.",
+    blockIds: ["renderItem", "renderList", "summary"],
+    required: ["renderItem", "renderList", "summary"]
+  },
+  {
+    id: "upgrade",
+    title: "Выбрать улучшение",
+    short: "выбор",
+    goal: "Выбрать одну полезную возможность: переключение, статистику, фильтр или обработку ошибки.",
+    result: "Дополнительные блоки становятся решением конкретной задачи, а не случайными кнопками.",
+    blockIds: ["toggle", "stats", "filterOpen", "tryCatch"],
+    required: [],
+    choose: 1
+  },
+  {
+    id: "browser",
+    title: "Перейти к экрану",
+    short: "браузер",
+    goal: "Подготовить мост от консольной логики к браузерному интерфейсу.",
+    result: "Студент понимает, зачем нужны шаблон, событие и сохранение.",
+    blockIds: ["domTemplate", "eventPlan", "storageDraft"],
+    required: ["domTemplate", "eventPlan"]
+  },
+  {
+    id: "react",
+    title: "Собрать React",
+    short: "Vite",
+    goal: "Открыть тот же проект как Vite React-приложение без ручного старта в терминале.",
+    result: "Технические слова появляются после результата: src/App.jsx, useState, components.",
+    blockIds: ["viteScaffold", "reactRoot", "appComponent", "reactState", "taskListComponent", "addFormComponent"],
+    required: ["viteScaffold", "reactRoot", "appComponent", "reactState", "taskListComponent", "addFormComponent"]
+  }
+];
+
 const files = {
   package: `{
   "scripts": {
@@ -253,10 +311,17 @@ const state = {
   selectedTab: "code",
   assembled: [],
   fileOverrides: {},
+  activeStage: "foundation",
   libraryFilter: "next",
   paletteFilter: "all"
 };
 
+const stageRail = document.querySelector("#stageRail");
+const stageTitle = document.querySelector("#stageTitle");
+const stageGoal = document.querySelector("#stageGoal");
+const stageResult = document.querySelector("#stageResult");
+const stageProgress = document.querySelector("#stageProgress");
+const nextStageBtn = document.querySelector("#nextStageBtn");
 const library = document.querySelector("#blockLibrary");
 const paletteOverlay = document.querySelector("#paletteOverlay");
 const paletteGrid = document.querySelector("#paletteGrid");
@@ -269,48 +334,105 @@ const visualState = document.querySelector("#visualState");
 const stepCount = document.querySelector("#stepCount");
 const statusText = document.querySelector("#statusText");
 
+function renderStageRail() {
+  stageRail.innerHTML = "";
+
+  stages.forEach((stage, index) => {
+    const button = document.createElement("button");
+    const locked = state.mode === "learn" && !isStageUnlocked(stage.id);
+    const done = isStageComplete(stage.id);
+    button.className = `stage-step ${stage.id === state.activeStage ? "active" : ""} ${done ? "done" : ""} ${locked ? "locked" : ""}`;
+    button.innerHTML = `
+      <span class="stage-index">${done ? "✓" : index + 1}</span>
+      <span class="stage-copy">
+        <strong>${stage.title}</strong>
+        <span>${stage.short}</span>
+      </span>
+      <span class="stage-status">${stageStatusLabel(stage.id)}</span>
+    `;
+    button.addEventListener("click", () => selectStage(stage.id));
+    stageRail.appendChild(button);
+  });
+}
+
+function renderStageCard() {
+  const stage = currentStage();
+  const required = stageRequiredBlocks(stage.id);
+  const selectedRequired = required.filter(block => state.assembled.includes(block.id)).length;
+  const selectedChoice = stageChoiceCount(stage.id);
+  const total = required.length + (stage.choose || 0);
+  const done = selectedRequired + Math.min(selectedChoice, stage.choose || 0);
+  const progress = total === 0 ? 100 : Math.round((done / total) * 100);
+
+  stageTitle.textContent = stage.title;
+  stageGoal.textContent = stage.goal;
+  stageResult.textContent = stage.result;
+  stageProgress.textContent = `${done}/${total}`;
+  stageProgress.style.setProperty("--progress", `${progress}%`);
+
+  const nextStage = nextStageAfter(stage.id);
+  nextStageBtn.hidden = !isStageComplete(stage.id) || !nextStage;
+  nextStageBtn.textContent = nextStage ? `Дальше: ${nextStage.title}` : "Маршрут завершен";
+}
+
 function renderLibrary() {
   library.innerHTML = "";
   const visibleBlocks = filterBlocks(state.libraryFilter);
 
   if (visibleBlocks.length === 0) {
-    library.innerHTML = `<div class="empty-note">Нет доступных блоков для этого фильтра.</div>`;
+    const stage = currentStage();
+    library.innerHTML = `<div class="empty-note">${isStageComplete(stage.id) ? "Этап собран. Запустите проверку или переходите дальше." : "Нет доступных действий для этого фильтра."}</div>`;
     return;
   }
 
-  for (const category of categoriesOf(visibleBlocks)) {
-    const title = document.createElement("div");
-    title.className = "category-title";
-    title.textContent = category;
-    library.appendChild(title);
-
-    for (const block of visibleBlocks.filter(item => item.category === category)) {
-      library.appendChild(createBlockCard(block));
-    }
+  for (const block of visibleBlocks) {
+    library.appendChild(createBlockCard(block));
   }
 }
 
 function renderPalette() {
   paletteGrid.innerHTML = "";
-  for (const block of filterBlocks(state.paletteFilter, { forPalette: true })) {
-    paletteGrid.appendChild(createBlockCard(block, { compact: false }));
+  const visible = filterBlocks(state.paletteFilter, { forPalette: true });
+
+  for (const stage of stages) {
+    const stageBlocksInPalette = visible.filter(block => blockStageId(block.id) === stage.id);
+    if (stageBlocksInPalette.length === 0) continue;
+
+    const group = document.createElement("section");
+    group.className = "palette-stage";
+    group.innerHTML = `
+      <header>
+        <strong>${stage.title}</strong>
+        <span>${stage.goal}</span>
+      </header>
+      <div class="palette-stage-grid"></div>
+    `;
+
+    const grid = group.querySelector(".palette-stage-grid");
+    stageBlocksInPalette.forEach(block => grid.appendChild(createBlockCard(block, { forPalette: true })));
+    paletteGrid.appendChild(group);
   }
 }
 
 function createBlockCard(block, options = {}) {
   const missing = missingDeps(block);
-  const locked = state.mode === "learn" && missing.length > 0;
+  const stageId = blockStageId(block.id);
+  const stage = findStage(stageId);
+  const locked = state.mode === "learn" && (!isStageUnlocked(stageId) || missing.length > 0);
+  const activeStageBlock = stageId === state.activeStage;
   const item = document.createElement("div");
-  item.className = `block ${block.required ? "required" : "optional"} ${locked ? "locked" : ""}`;
+  item.className = `block ${isStageRequiredBlock(block.id) ? "required" : "optional"} ${locked ? "locked" : ""} ${activeStageBlock ? "current-stage-block" : ""}`;
   item.draggable = !locked;
   item.dataset.id = block.id;
   item.innerHTML = `
     <div class="block-top">
       <strong>${block.title}</strong>
-      <span class="badge ${block.required ? "" : "optional"}">${blockBadge(block)}</span>
+      <span class="badge ${isStageRequiredBlock(block.id) ? "" : "optional"}">${blockBadge(block)}</span>
     </div>
+    <small class="stage-label">${stage.title}</small>
     <small>${block.explain}</small>
     <small class="why">${block.why}</small>
+    ${!isStageUnlocked(stageId) && state.mode === "learn" ? `<small class="requires">Сначала завершите предыдущий этап</small>` : ""}
     ${missing.length > 0 ? `<small class="requires">Сначала: ${missing.map(depId => findBlock(depId).title).join(", ")}</small>` : ""}
   `;
   item.addEventListener("dragstart", event => {
@@ -322,36 +444,77 @@ function createBlockCard(block, options = {}) {
 
 function renderBuilder() {
   dropZone.innerHTML = "";
-  if (state.assembled.length === 0) {
-    const empty = document.createElement("p");
-    empty.textContent = "Начните с понятного шага. Платформа сама подготовит технические файлы.";
-    dropZone.appendChild(empty);
-  }
-
-  state.assembled.forEach((blockId, index) => {
-    const block = findBlock(blockId);
-    const row = document.createElement("div");
-    row.className = "assembled";
-    row.innerHTML = `
-      <span>${index + 1}</span>
-      <div><strong>${block.title}</strong><br><code>${block.explain}</code></div>
-      <span class="badge ${block.required ? "" : "optional"}">${block.required ? "обяз." : "доп."}</span>
-      <button class="remove" aria-label="Remove block">x</button>
+  stages.forEach((stage, stageIndex) => {
+    const stageBlockIds = state.assembled.filter(blockId => blockStageId(blockId) === stage.id);
+    const section = document.createElement("section");
+    const locked = state.mode === "learn" && !isStageUnlocked(stage.id);
+    section.className = `stage-build ${stage.id === state.activeStage ? "current" : ""} ${isStageComplete(stage.id) ? "done" : ""} ${locked ? "locked" : ""}`;
+    section.innerHTML = `
+      <header class="stage-build-head">
+        <div>
+          <strong>${stageIndex + 1}. ${stage.title}</strong>
+          <span>${stage.goal}</span>
+        </div>
+        <span>${stageStatusLabel(stage.id)}</span>
+      </header>
+      <div class="stage-build-body"></div>
     `;
-    row.querySelector(".remove").addEventListener("click", () => {
-      state.assembled.splice(index, 1);
-      sync();
+
+    const body = section.querySelector(".stage-build-body");
+    if (stageBlockIds.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = locked ? "Откроется после предыдущего этапа." : "Пока нет действий в этом этапе.";
+      body.appendChild(empty);
+    }
+
+    stageBlockIds.forEach(blockId => {
+      const block = findBlock(blockId);
+      const index = state.assembled.indexOf(blockId);
+      const row = document.createElement("div");
+      row.className = "assembled";
+      row.innerHTML = `
+        <span>${index + 1}</span>
+        <div><strong>${block.title}</strong><br><code>${block.explain}</code></div>
+        <span class="badge ${isStageRequiredBlock(block.id) ? "" : "optional"}">${blockBadge(block)}</span>
+        <button class="remove" aria-label="Remove block">x</button>
+      `;
+      row.querySelector(".remove").addEventListener("click", () => {
+        state.assembled.splice(index, 1);
+        sync();
+      });
+      body.appendChild(row);
     });
-    dropZone.appendChild(row);
+
+    if (stage.id === state.activeStage && !isStageComplete(stage.id)) {
+      const nextBlock = nextBlockForStage(stage.id);
+      const next = document.createElement("div");
+      next.className = "stage-next";
+      if (nextBlock) {
+        next.innerHTML = `
+          <strong>Следующее действие: ${nextBlock.title}</strong>
+          <span>${nextBlock.why}</span>
+          <button class="small-button" type="button">Добавить действие</button>
+        `;
+        next.querySelector("button").addEventListener("click", () => addBlock(nextBlock.id));
+      } else {
+        next.innerHTML = `
+          <strong>Нужен выбор</strong>
+          <span>Выберите одно улучшение слева, которое реально меняет поведение проекта.</span>
+        `;
+      }
+      body.appendChild(next);
+    }
+
+    dropZone.appendChild(section);
   });
 
-  const requiredDone = requiredBlocks().filter(block => state.assembled.includes(block.id)).length;
-  stepCount.textContent = `${state.assembled.length} блоков · ${requiredDone}/${requiredBlocks().length} обязательных`;
+  const completedStages = stages.filter(stage => isStageComplete(stage.id)).length;
+  stepCount.textContent = `${completedStages}/${stages.length} этапов · ${state.assembled.length} действий`;
 }
 
 function generateCode() {
   if (state.assembled.length === 0) {
-    return "// Соберите проект из блоков слева.\n// Обязательные блоки отмечены бейджем \"обяз.\".\n";
+    return "// Идите по этапам слева.\n// Каждый этап добавляет понятный кусок проекта.\n";
   }
 
   return state.assembled
@@ -380,12 +543,14 @@ function renderEditor() {
   codeEditor.readOnly = !editable;
   codeEditor.classList.toggle("is-editable", editable);
   codeHint.textContent = editable
-    ? `Editable: можно менять ${currentTabName()} руками. Для Vite/React build нужен Node runner.`
-    : "Read-only: код генерируется из блоков. Для ручного редактирования включите продвинутый режим.";
+    ? `Editable: можно менять ${currentTabName()} руками. Сейчас открыт этап "${currentStage().title}".`
+    : `Read-only: код рождается из действий этапа "${currentStage().title}". Ручное редактирование доступно в продвинутом режиме.`;
   codeEditor.value = currentFileText();
 }
 
 function sync() {
+  renderStageRail();
+  renderStageCard();
   renderBuilder();
   renderLibrary();
   renderPalette();
@@ -395,20 +560,28 @@ function sync() {
 
 function addBlock(blockId) {
   const block = findBlock(blockId);
+  const stageId = blockStageId(block.id);
   if (state.assembled.includes(blockId)) {
-    setStatus("Блок уже добавлен");
+    setStatus("Это действие уже добавлено");
+    return;
+  }
+  if (state.mode === "learn" && !isStageUnlocked(stageId)) {
+    const stage = findStage(stageId);
+    diagnosticsOutput.textContent = `${stage.title} пока закрыт.\nСначала завершите предыдущий этап проекта.`;
+    setStatus("Этап еще закрыт");
     return;
   }
   const missing = missingDeps(block);
   if (state.mode === "learn" && missing.length > 0) {
     const names = missing.map(depId => findBlock(depId).title).join(", ");
-    diagnosticsOutput.textContent = `${block.title} пока рано добавлять.\nСначала соберите: ${names}`;
-    setStatus("Нужны зависимости");
+    diagnosticsOutput.textContent = `${block.title} пока рано добавлять.\nСначала выполните: ${names}`;
+    setStatus("Нужны предыдущие действия");
     return;
   }
+  state.activeStage = stageId;
   state.assembled.push(blockId);
-  setStatus(block.required ? "Обязательный блок добавлен" : "Улучшение добавлено");
-  if (!block.required) {
+  setStatus(isStageComplete(stageId) ? "Этап собран" : "Действие добавлено");
+  if (!isStageRequiredBlock(block.id)) {
     diagnosticsOutput.textContent = `${block.title}\nЧто добавили: ${block.explain}\nЗачем: ${block.why}`;
   }
   sync();
@@ -436,6 +609,9 @@ dropZone.addEventListener("drop", event => {
 document.querySelectorAll(".mode").forEach(button => {
   button.addEventListener("click", () => {
     state.mode = button.dataset.mode;
+    if (state.mode === "learn" && !isStageUnlocked(state.activeStage)) {
+      state.activeStage = stages.find(stage => !isStageComplete(stage.id))?.id || stages[0].id;
+    }
     document.querySelector(".course-window").classList.toggle("is-advanced", state.mode === "advanced");
     document.querySelectorAll(".mode").forEach(item => item.classList.toggle("active", item === button));
     setStatus(state.mode === "advanced" ? "Код справа можно редактировать" : "Обучающий режим");
@@ -468,6 +644,11 @@ document.querySelector("#closePaletteBtn").addEventListener("click", () => {
   paletteOverlay.hidden = true;
 });
 
+nextStageBtn.addEventListener("click", () => {
+  const nextStage = nextStageAfter(state.activeStage);
+  if (nextStage) selectStage(nextStage.id);
+});
+
 paletteOverlay.addEventListener("click", event => {
   if (event.target === paletteOverlay) {
     paletteOverlay.hidden = true;
@@ -491,6 +672,11 @@ codeEditor.addEventListener("input", () => {
 
 document.querySelector("#resetBtn").addEventListener("click", () => {
   state.assembled = [];
+  state.activeStage = "foundation";
+  state.libraryFilter = "next";
+  document.querySelectorAll(".filter").forEach(item => {
+    item.classList.toggle("active", item.dataset.filter === "next");
+  });
   consoleOutput.textContent = "";
   diagnosticsOutput.textContent = "";
   setStatus("Сброшено");
@@ -521,30 +707,36 @@ function runCode() {
 }
 
 function runTests() {
-  const missing = requiredBlocks().filter(block => !state.assembled.includes(block.id));
+  const stage = currentStage();
+  const missing = stageRequiredBlocks(stage.id).filter(block => !state.assembled.includes(block.id));
+  const choiceMissing = Math.max(0, (stage.choose || 0) - stageChoiceCount(stage.id));
   const orderErrors = findOrderErrors();
 
-  if (missing.length === 0 && orderErrors.length === 0) {
+  if (missing.length === 0 && choiceMissing === 0 && orderErrors.length === 0) {
     diagnosticsOutput.textContent = [
-      "Tests passed: обязательные блоки собраны.",
-      "Дополнительные блоки можно добавлять для интерактивности, статистики, DOM и Vite/React.",
-      hasReactBlocks() ? "Vite/React блоки требуют Node runner: npm run build + tests." : ""
+      `Этап принят: ${stage.title}.`,
+      stage.result,
+      allStagesComplete() ? "Весь маршрут собран: можно переходить к реальной сборке проекта и аккаунтам." : "Теперь можно перейти к следующему этапу.",
+      hasReactBlocks() ? "Vite/React часть в реальном приложении проверяется Node runner: npm run build + tests." : ""
     ].filter(Boolean).join("\n");
-    setStatus("Tests passed");
+    setStatus("Этап проверен");
     return;
   }
 
   const messages = [];
   if (missing.length > 0) {
-    messages.push(`Не хватает обязательных блоков: ${missing.map(block => block.title).join(", ")}`);
+    messages.push(`Для этапа не хватает: ${missing.map(block => block.title).join(", ")}`);
+  }
+  if (choiceMissing > 0) {
+    messages.push(`Нужно выбрать еще улучшений: ${choiceMissing}`);
   }
   if (orderErrors.length > 0) {
-    messages.push("Порядок зависимостей:");
+    messages.push("Порядок действий:");
     messages.push(...orderErrors.map(error => `- ${error}`));
   }
 
   diagnosticsOutput.textContent = messages.join("\n");
-  setStatus("Tests failed");
+  setStatus("Этап не закрыт");
 }
 
 function findOrderErrors() {
@@ -578,13 +770,15 @@ function explainError(error) {
 }
 
 function renderVisualState() {
-  const requiredDone = requiredBlocks().filter(block => state.assembled.includes(block.id)).length;
+  const stage = currentStage();
+  const completedStages = stages.filter(item => isStageComplete(item.id)).length;
   const rows = [
     ["mode", state.mode],
-    ["blocks", String(state.assembled.length)],
-    ["required", `${requiredDone}/${requiredBlocks().length}`],
+    ["stage", stage.title],
+    ["progress", `${completedStages}/${stages.length}`],
+    ["actions", String(state.assembled.length)],
     ["framework", hasReactBlocks() ? "vite-react" : "vanilla-js"],
-    ["next", filterBlocks("next").length ? filterBlocks("next")[0].title : "ready"],
+    ["next", nextBlockForStage(stage.id)?.title || (isStageComplete(stage.id) ? "stage ready" : "choose upgrade")],
     ["editable", state.mode === "advanced" ? "yes" : "no"],
     ["network", "npm strict-ssl=false profile"]
   ];
@@ -595,15 +789,98 @@ function renderVisualState() {
 }
 
 function requiredBlocks() {
-  return blocks.filter(block => block.required);
+  return [...new Set(stages.flatMap(stage => stage.required))].map(findBlock);
 }
 
 function findBlock(blockId) {
   return blocks.find(block => block.id === blockId);
 }
 
-function categoriesOf(items) {
-  return [...new Set(items.map(block => block.category))];
+function findStage(stageId) {
+  return stages.find(stage => stage.id === stageId);
+}
+
+function currentStage() {
+  return findStage(state.activeStage);
+}
+
+function blockStageId(blockId) {
+  return stages.find(stage => stage.blockIds.includes(blockId))?.id || "foundation";
+}
+
+function stageRequiredBlocks(stageId) {
+  return findStage(stageId).required.map(findBlock);
+}
+
+function stageChoiceCount(stageId) {
+  const stage = findStage(stageId);
+  return stage.blockIds
+    .filter(blockId => !stage.required.includes(blockId))
+    .filter(blockId => state.assembled.includes(blockId))
+    .length;
+}
+
+function isStageRequiredBlock(blockId) {
+  return findStage(blockStageId(blockId)).required.includes(blockId);
+}
+
+function isStageComplete(stageId) {
+  const stage = findStage(stageId);
+  const requiredDone = stage.required.every(blockId => state.assembled.includes(blockId));
+  const choiceDone = !stage.choose || stageChoiceCount(stageId) >= stage.choose;
+  return requiredDone && choiceDone;
+}
+
+function allStagesComplete() {
+  return stages.every(stage => isStageComplete(stage.id));
+}
+
+function isStageUnlocked(stageId) {
+  const index = stages.findIndex(stage => stage.id === stageId);
+  return stages.slice(0, index).every(stage => isStageComplete(stage.id));
+}
+
+function nextStageAfter(stageId) {
+  const index = stages.findIndex(stage => stage.id === stageId);
+  return stages[index + 1] || null;
+}
+
+function selectStage(stageId) {
+  if (state.mode === "learn" && !isStageUnlocked(stageId)) {
+    diagnosticsOutput.textContent = `${findStage(stageId).title} пока закрыт.\nЗакройте предыдущие этапы, чтобы курс не превращался в хаос.`;
+    setStatus("Этап закрыт");
+    return;
+  }
+  state.activeStage = stageId;
+  state.libraryFilter = "next";
+  document.querySelectorAll(".filter").forEach(item => {
+    item.classList.toggle("active", item.dataset.filter === "next");
+  });
+  setStatus(`Этап: ${findStage(stageId).title}`);
+  sync();
+}
+
+function stageStatusLabel(stageId) {
+  if (isStageComplete(stageId)) return "готов";
+  if (state.mode === "learn" && !isStageUnlocked(stageId)) return "закрыт";
+  const stage = findStage(stageId);
+  const requiredLeft = stage.required.filter(blockId => !state.assembled.includes(blockId)).length;
+  if (requiredLeft > 0) return `${requiredLeft} нужно`;
+  if (stage.choose && stageChoiceCount(stageId) < stage.choose) return "выбор";
+  return "доступно";
+}
+
+function nextBlockForStage(stageId) {
+  if (isStageComplete(stageId)) return null;
+  const stage = findStage(stageId);
+  const stageBlocks = stage.blockIds.map(findBlock);
+  const ready = block => !state.assembled.includes(block.id) && missingDeps(block).length === 0;
+  const requiredNext = stage.required.map(findBlock).find(ready);
+  if (requiredNext) return requiredNext;
+  if (stage.choose && stageChoiceCount(stageId) < stage.choose) {
+    return null;
+  }
+  return stageBlocks.find(ready) || null;
 }
 
 function missingDeps(block) {
@@ -611,23 +888,27 @@ function missingDeps(block) {
 }
 
 function blockBadge(block) {
+  if (isStageRequiredBlock(block.id)) return "обяз.";
+  if (findStage(blockStageId(block.id)).choose) return "выбор";
   if (block.runner === "vite-react") return "React";
-  return block.required ? "обяз." : "доп.";
+  return "доп.";
 }
 
 function filterBlocks(filter, options = {}) {
-  const availableBlocks = blocks.filter(block => options.forPalette || !state.assembled.includes(block.id));
-  if (filter === "required") return availableBlocks.filter(block => block.required);
-  if (filter === "optional") return availableBlocks.filter(block => !block.required && block.runner !== "vite-react");
+  const stage = currentStage();
+  const source = options.forPalette ? blocks : stage.blockIds.map(findBlock);
+  const availableBlocks = source.filter(block => options.forPalette || !state.assembled.includes(block.id));
+  if (filter === "required") return availableBlocks.filter(block => isStageRequiredBlock(block.id));
+  if (filter === "optional") return availableBlocks.filter(block => !isStageRequiredBlock(block.id) && block.runner !== "vite-react");
   if (filter === "react") return availableBlocks.filter(block => block.runner === "vite-react");
   if (filter === "all") return availableBlocks;
 
-  const requiredLeft = requiredBlocks().some(block => !state.assembled.includes(block.id));
-  return availableBlocks.filter(block => {
-    const ready = missingDeps(block).length === 0;
-    if (!ready) return false;
-    return requiredLeft ? block.required : true;
-  });
+  if (isStageComplete(stage.id)) return [];
+  const next = nextBlockForStage(stage.id);
+  if (!next && stage.choose && stageChoiceCount(stage.id) < stage.choose) {
+    return availableBlocks.filter(block => !isStageRequiredBlock(block.id) && missingDeps(block).length === 0);
+  }
+  return next ? [next] : availableBlocks.filter(block => missingDeps(block).length === 0);
 }
 
 function hasReactBlocks() {
@@ -650,7 +931,7 @@ function generateReactAppCode() {
   const selected = new Set(state.assembled);
   if (!selected.has("appComponent")) {
     return `export default function App() {
-  return <h1>Добавьте блок "Компонент App"</h1>;
+  return <h1>Добавьте действие "Главный экран App"</h1>;
 }`;
   }
 
@@ -721,5 +1002,4 @@ ${appBody}
 }`;
 }
 
-renderLibrary();
 sync();
