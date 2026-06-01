@@ -141,66 +141,66 @@ const blocks = [
   },
   {
     id: "viteScaffold",
-    title: "Vite React шаблон",
+    title: "Подготовить React-проект",
     category: "Vite React",
     required: false,
-    explain: "Создает структуру проекта Vite + React.",
-    why: "Так студент переходит от JS-логики к реальному frontend-стеку.",
+    explain: "Создает проект, где React уже подключен.",
+    why: "Студент начинает с экрана, а не с команды в терминале.",
     deps: [],
     runner: "vite-react",
     code: "// Vite React: смотрите package.json, src/main.jsx и src/App.jsx в продвинутом режиме."
   },
   {
     id: "reactRoot",
-    title: "React root",
+    title: "Подключить экран к странице",
     category: "Vite React",
     required: false,
-    explain: "Подключает React-приложение к `#root`.",
-    why: "Это входная точка любого Vite React проекта.",
+    explain: "Показывает, где приложение появляется на странице.",
+    why: "Техническое имя этого места: `src/main.jsx`.",
     deps: ["viteScaffold"],
     runner: "vite-react",
     code: "// React root живет в src/main.jsx."
   },
   {
     id: "appComponent",
-    title: "Компонент App",
+    title: "Главный экран App",
     category: "Vite React",
     required: false,
-    explain: "Переносит задачу урока в React-компонент.",
-    why: "Компоненты - основной способ собирать интерфейсы.",
+    explain: "Создает главный экран приложения.",
+    why: "Техническое имя файла: `src/App.jsx`.",
     deps: ["reactRoot"],
     runner: "vite-react",
     code: "// App component живет в src/App.jsx."
   },
   {
     id: "reactState",
-    title: "useState для задач",
+    title: "Память экрана",
     category: "Vite React",
     required: false,
-    explain: "Хранит задачи через React state.",
-    why: "State обновляет интерфейс после действий пользователя.",
+    explain: "Запоминает задачи внутри React-экрана.",
+    why: "Техническое имя механизма: `useState`.",
     deps: ["appComponent"],
     runner: "vite-react",
     code: "// useState добавлен в src/App.jsx."
   },
   {
     id: "taskListComponent",
-    title: "TaskList component",
+    title: "Список задач",
     category: "Vite React",
     required: false,
-    explain: "Выносит список задач в отдельный компонент.",
-    why: "Так App не превращается в один огромный файл.",
+    explain: "Выносит список в отдельный кусок интерфейса.",
+    why: "Позже это называется component composition.",
     deps: ["reactState"],
     runner: "vite-react",
     code: "// TaskList добавлен в src/App.jsx."
   },
   {
     id: "addFormComponent",
-    title: "AddTaskForm",
+    title: "Форма добавления",
     category: "Vite React",
     required: false,
-    explain: "Добавляет форму и обработчик submit.",
-    why: "Формы и события - ежедневная работа во frontend.",
+    explain: "Добавляет поле ввода и кнопку.",
+    why: "Технически это form submit и event handler.",
     deps: ["reactState"],
     runner: "vite-react",
     code: "// AddTaskForm добавлен в src/App.jsx."
@@ -324,7 +324,7 @@ function renderBuilder() {
   dropZone.innerHTML = "";
   if (state.assembled.length === 0) {
     const empty = document.createElement("p");
-    empty.textContent = "Соберите обязательные блоки, затем добавьте дополнительные.";
+    empty.textContent = "Начните с понятного шага. Платформа сама подготовит технические файлы.";
     dropZone.appendChild(empty);
   }
 
@@ -409,7 +409,7 @@ function addBlock(blockId) {
   state.assembled.push(blockId);
   setStatus(block.required ? "Обязательный блок добавлен" : "Улучшение добавлено");
   if (!block.required) {
-    diagnosticsOutput.textContent = `${block.title}: ${block.why}`;
+    diagnosticsOutput.textContent = `${block.title}\nЧто добавили: ${block.explain}\nЗачем: ${block.why}`;
   }
   sync();
 }
