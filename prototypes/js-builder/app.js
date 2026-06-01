@@ -126,7 +126,7 @@ const blocks = [
     required: false,
     explain: "Добавляет заготовку обработчика события.",
     why: "В продвинутом режиме студент допишет реальный DOM-код.",
-    deps: [],
+    deps: ["add", "renderList"],
     code: "function onAddButtonClick(inputValue) {\n  addTask(inputValue);\n  return renderList();\n}"
   },
   {
@@ -252,10 +252,14 @@ const state = {
   mode: "learn",
   selectedTab: "code",
   assembled: [],
-  fileOverrides: {}
+  fileOverrides: {},
+  libraryFilter: "next",
+  paletteFilter: "all"
 };
 
 const library = document.querySelector("#blockLibrary");
+const paletteOverlay = document.querySelector("#paletteOverlay");
+const paletteGrid = document.querySelector("#paletteGrid");
 const dropZone = document.querySelector("#dropZone");
 const codeEditor = document.querySelector("#codeEditor");
 const codeHint = document.querySelector("#codeHint");
@@ -267,34 +271,53 @@ const statusText = document.querySelector("#statusText");
 
 function renderLibrary() {
   library.innerHTML = "";
-  const categories = [...new Set(blocks.map(block => block.category))];
+  const visibleBlocks = filterBlocks(state.libraryFilter);
 
-  for (const category of categories) {
+  if (visibleBlocks.length === 0) {
+    library.innerHTML = `<div class="empty-note">Нет доступных блоков для этого фильтра.</div>`;
+    return;
+  }
+
+  for (const category of categoriesOf(visibleBlocks)) {
     const title = document.createElement("div");
     title.className = "category-title";
     title.textContent = category;
     library.appendChild(title);
 
-    for (const block of blocks.filter(item => item.category === category)) {
-      const item = document.createElement("div");
-      item.className = `block ${block.required ? "required" : "optional"}`;
-      item.draggable = true;
-      item.dataset.id = block.id;
-      item.innerHTML = `
-        <div class="block-top">
-          <strong>${block.title}</strong>
-          <span class="badge ${block.required ? "" : "optional"}">${block.required ? "обяз." : "доп."}</span>
-        </div>
-        <small>${block.explain}</small>
-        <small class="why">${block.why}</small>
-      `;
-      item.addEventListener("dragstart", event => {
-        event.dataTransfer.setData("text/plain", block.id);
-      });
-      item.addEventListener("click", () => addBlock(block.id));
-      library.appendChild(item);
+    for (const block of visibleBlocks.filter(item => item.category === category)) {
+      library.appendChild(createBlockCard(block));
     }
   }
+}
+
+function renderPalette() {
+  paletteGrid.innerHTML = "";
+  for (const block of filterBlocks(state.paletteFilter, { forPalette: true })) {
+    paletteGrid.appendChild(createBlockCard(block, { compact: false }));
+  }
+}
+
+function createBlockCard(block, options = {}) {
+  const missing = missingDeps(block);
+  const locked = state.mode === "learn" && missing.length > 0;
+  const item = document.createElement("div");
+  item.className = `block ${block.required ? "required" : "optional"} ${locked ? "locked" : ""}`;
+  item.draggable = !locked;
+  item.dataset.id = block.id;
+  item.innerHTML = `
+    <div class="block-top">
+      <strong>${block.title}</strong>
+      <span class="badge ${block.required ? "" : "optional"}">${blockBadge(block)}</span>
+    </div>
+    <small>${block.explain}</small>
+    <small class="why">${block.why}</small>
+    ${missing.length > 0 ? `<small class="requires">Сначала: ${missing.map(depId => findBlock(depId).title).join(", ")}</small>` : ""}
+  `;
+  item.addEventListener("dragstart", event => {
+    event.dataTransfer.setData("text/plain", block.id);
+  });
+  item.addEventListener("click", () => addBlock(block.id));
+  return item;
 }
 
 function renderBuilder() {
@@ -364,17 +387,30 @@ function renderEditor() {
 
 function sync() {
   renderBuilder();
+  renderLibrary();
+  renderPalette();
   renderEditor();
   renderVisualState();
 }
 
 function addBlock(blockId) {
-  if (state.mode === "learn" && state.assembled.includes(blockId)) {
+  const block = findBlock(blockId);
+  if (state.assembled.includes(blockId)) {
     setStatus("Блок уже добавлен");
     return;
   }
+  const missing = missingDeps(block);
+  if (state.mode === "learn" && missing.length > 0) {
+    const names = missing.map(depId => findBlock(depId).title).join(", ");
+    diagnosticsOutput.textContent = `${block.title} пока рано добавлять.\nСначала соберите: ${names}`;
+    setStatus("Нужны зависимости");
+    return;
+  }
   state.assembled.push(blockId);
-  setStatus("Блок добавлен");
+  setStatus(block.required ? "Обязательный блок добавлен" : "Улучшение добавлено");
+  if (!block.required) {
+    diagnosticsOutput.textContent = `${block.title}: ${block.why}`;
+  }
   sync();
 }
 
@@ -405,6 +441,37 @@ document.querySelectorAll(".mode").forEach(button => {
     setStatus(state.mode === "advanced" ? "Код справа можно редактировать" : "Обучающий режим");
     sync();
   });
+});
+
+document.querySelectorAll(".filter").forEach(button => {
+  button.addEventListener("click", () => {
+    state.libraryFilter = button.dataset.filter;
+    document.querySelectorAll(".filter").forEach(item => item.classList.toggle("active", item === button));
+    renderLibrary();
+  });
+});
+
+document.querySelectorAll(".palette-filter").forEach(button => {
+  button.addEventListener("click", () => {
+    state.paletteFilter = button.dataset.paletteFilter;
+    document.querySelectorAll(".palette-filter").forEach(item => item.classList.toggle("active", item === button));
+    renderPalette();
+  });
+});
+
+document.querySelector("#openPaletteBtn").addEventListener("click", () => {
+  paletteOverlay.hidden = false;
+  renderPalette();
+});
+
+document.querySelector("#closePaletteBtn").addEventListener("click", () => {
+  paletteOverlay.hidden = true;
+});
+
+paletteOverlay.addEventListener("click", event => {
+  if (event.target === paletteOverlay) {
+    paletteOverlay.hidden = true;
+  }
 });
 
 document.querySelectorAll(".tab").forEach(button => {
@@ -517,6 +584,7 @@ function renderVisualState() {
     ["blocks", String(state.assembled.length)],
     ["required", `${requiredDone}/${requiredBlocks().length}`],
     ["framework", hasReactBlocks() ? "vite-react" : "vanilla-js"],
+    ["next", filterBlocks("next").length ? filterBlocks("next")[0].title : "ready"],
     ["editable", state.mode === "advanced" ? "yes" : "no"],
     ["network", "npm strict-ssl=false profile"]
   ];
@@ -532,6 +600,34 @@ function requiredBlocks() {
 
 function findBlock(blockId) {
   return blocks.find(block => block.id === blockId);
+}
+
+function categoriesOf(items) {
+  return [...new Set(items.map(block => block.category))];
+}
+
+function missingDeps(block) {
+  return block.deps.filter(depId => !state.assembled.includes(depId));
+}
+
+function blockBadge(block) {
+  if (block.runner === "vite-react") return "React";
+  return block.required ? "обяз." : "доп.";
+}
+
+function filterBlocks(filter, options = {}) {
+  const availableBlocks = blocks.filter(block => options.forPalette || !state.assembled.includes(block.id));
+  if (filter === "required") return availableBlocks.filter(block => block.required);
+  if (filter === "optional") return availableBlocks.filter(block => !block.required && block.runner !== "vite-react");
+  if (filter === "react") return availableBlocks.filter(block => block.runner === "vite-react");
+  if (filter === "all") return availableBlocks;
+
+  const requiredLeft = requiredBlocks().some(block => !state.assembled.includes(block.id));
+  return availableBlocks.filter(block => {
+    const ready = missingDeps(block).length === 0;
+    if (!ready) return false;
+    return requiredLeft ? block.required : true;
+  });
 }
 
 function hasReactBlocks() {

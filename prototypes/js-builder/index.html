@@ -35,8 +35,21 @@
         <section class="workspace">
           <aside class="library" aria-label="Blocks">
             <div class="library-head">
-              <h2>Блоки</h2>
-              <span>перетащите или нажмите</span>
+              <div>
+                <h2>Блоки</h2>
+                <span>сначала рекомендованные</span>
+              </div>
+              <button id="openPaletteBtn" class="small-button">Каталог</button>
+            </div>
+            <div class="lesson-card">
+              <strong>Цель</strong>
+              <span>Соберите рабочий счетчик задач. Доп. блоки улучшают проект после основы.</span>
+            </div>
+            <div class="filter-row" aria-label="Block filters">
+              <button class="filter active" data-filter="next">Дальше</button>
+              <button class="filter" data-filter="required">Обяз.</button>
+              <button class="filter" data-filter="optional">Доп.</button>
+              <button class="filter" data-filter="react">React</button>
             </div>
             <div id="blockLibrary" class="block-list"></div>
           </aside>
@@ -79,6 +92,25 @@
             <div id="visualState"></div>
           </section>
         </footer>
+      </section>
+
+      <section id="paletteOverlay" class="palette-overlay" hidden>
+        <div class="palette-dialog" role="dialog" aria-modal="true" aria-label="Block catalog">
+          <header class="palette-head">
+            <div>
+              <h2>Каталог блоков</h2>
+              <span>Полная сетка: основа, улучшения, Vite + React</span>
+            </div>
+            <button id="closePaletteBtn" class="small-button">Закрыть</button>
+          </header>
+          <div class="filter-row palette-filters" aria-label="Catalog filters">
+            <button class="palette-filter active" data-palette-filter="all">Все</button>
+            <button class="palette-filter" data-palette-filter="required">Обяз.</button>
+            <button class="palette-filter" data-palette-filter="optional">Доп.</button>
+            <button class="palette-filter" data-palette-filter="react">React</button>
+          </div>
+          <div id="paletteGrid" class="palette-grid"></div>
+        </div>
       </section>
     </main>
     <script src="./app.js"></script>
