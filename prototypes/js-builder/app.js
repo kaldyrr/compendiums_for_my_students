@@ -312,11 +312,19 @@ const state = {
   assembled: [],
   fileOverrides: {},
   activeStage: "foundation",
+  transitioningStage: null,
+  recentBlock: null,
   libraryFilter: "next",
   paletteFilter: "all"
 };
 
+const AUTO_ADVANCE_DELAY = 950;
+const RECENT_BLOCK_DELAY = 720;
+let autoAdvanceTimer = null;
+let recentBlockTimer = null;
+
 const stageRail = document.querySelector("#stageRail");
+const stageCard = document.querySelector("#stageCard");
 const stageTitle = document.querySelector("#stageTitle");
 const stageGoal = document.querySelector("#stageGoal");
 const stageResult = document.querySelector("#stageResult");
@@ -341,12 +349,13 @@ function renderStageRail() {
     const button = document.createElement("button");
     const locked = state.mode === "learn" && !isStageUnlocked(stage.id);
     const done = isStageComplete(stage.id);
-    button.className = `stage-step ${stage.id === state.activeStage ? "active" : ""} ${done ? "done" : ""} ${locked ? "locked" : ""}`;
+    const transitioning = state.transitioningStage === stage.id;
+    button.className = `stage-step ${stage.id === state.activeStage ? "active" : ""} ${done ? "done" : ""} ${locked ? "locked" : ""} ${transitioning ? "transitioning" : ""}`;
     button.innerHTML = `
       <span class="stage-index">${done ? "✓" : index + 1}</span>
       <span class="stage-copy">
-        <strong>${stage.title}</strong>
-        <span>${stage.short}</span>
+        <strong>${stage.short}</strong>
+        <span>${stage.title}</span>
       </span>
       <span class="stage-status">${stageStatusLabel(stage.id)}</span>
     `;
@@ -371,7 +380,13 @@ function renderStageCard() {
   stageProgress.style.setProperty("--progress", `${progress}%`);
 
   const nextStage = nextStageAfter(stage.id);
-  nextStageBtn.hidden = !isStageComplete(stage.id) || !nextStage;
+  const transitioning = state.transitioningStage === stage.id;
+  stageCard.classList.toggle("stage-complete", isStageComplete(stage.id));
+  stageCard.classList.toggle("stage-transitioning", transitioning);
+  if (transitioning && nextStage) {
+    stageResult.textContent = `${stage.result} Сейчас откроется "${nextStage.title}".`;
+  }
+  nextStageBtn.hidden = transitioning || !isStageComplete(stage.id) || !nextStage;
   nextStageBtn.textContent = nextStage ? `Дальше: ${nextStage.title}` : "Маршрут завершен";
 }
 
@@ -448,7 +463,8 @@ function renderBuilder() {
     const stageBlockIds = state.assembled.filter(blockId => blockStageId(blockId) === stage.id);
     const section = document.createElement("section");
     const locked = state.mode === "learn" && !isStageUnlocked(stage.id);
-    section.className = `stage-build ${stage.id === state.activeStage ? "current" : ""} ${isStageComplete(stage.id) ? "done" : ""} ${locked ? "locked" : ""}`;
+    const transitioning = state.transitioningStage === stage.id;
+    section.className = `stage-build ${stage.id === state.activeStage ? "current" : ""} ${isStageComplete(stage.id) ? "done" : ""} ${locked ? "locked" : ""} ${transitioning ? "transitioning" : ""}`;
     section.innerHTML = `
       <header class="stage-build-head">
         <div>
@@ -471,7 +487,7 @@ function renderBuilder() {
       const block = findBlock(blockId);
       const index = state.assembled.indexOf(blockId);
       const row = document.createElement("div");
-      row.className = "assembled";
+      row.className = `assembled ${state.recentBlock === blockId ? "new-item" : ""}`;
       row.innerHTML = `
         <span>${index + 1}</span>
         <div><strong>${block.title}</strong><br><code>${block.explain}</code></div>
@@ -479,6 +495,7 @@ function renderBuilder() {
         <button class="remove" aria-label="Remove block">x</button>
       `;
       row.querySelector(".remove").addEventListener("click", () => {
+        clearAutoAdvance();
         state.assembled.splice(index, 1);
         sync();
       });
@@ -558,6 +575,49 @@ function sync() {
   renderVisualState();
 }
 
+function clearAutoAdvance() {
+  if (autoAdvanceTimer) {
+    clearTimeout(autoAdvanceTimer);
+    autoAdvanceTimer = null;
+  }
+  state.transitioningStage = null;
+}
+
+function markRecentBlock(blockId) {
+  if (recentBlockTimer) clearTimeout(recentBlockTimer);
+  state.recentBlock = blockId;
+  recentBlockTimer = setTimeout(() => {
+    if (state.recentBlock === blockId) {
+      state.recentBlock = null;
+      sync();
+    }
+  }, RECENT_BLOCK_DELAY);
+}
+
+function scheduleAutoAdvance(stageId) {
+  if (state.mode !== "learn") return;
+
+  const nextStage = nextStageAfter(stageId);
+  if (!nextStage || !isStageComplete(stageId)) return;
+
+  if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+  state.transitioningStage = stageId;
+  setStatus(`Этап готов, открываю "${nextStage.title}"`);
+  sync();
+
+  autoAdvanceTimer = setTimeout(() => {
+    autoAdvanceTimer = null;
+    if (state.activeStage === stageId && isStageComplete(stageId)) {
+      state.transitioningStage = null;
+      selectStage(nextStage.id, { automatic: true });
+      diagnosticsOutput.textContent = `Автопереход: открыт этап "${nextStage.title}".\n${nextStage.goal}`;
+    } else {
+      state.transitioningStage = null;
+      sync();
+    }
+  }, AUTO_ADVANCE_DELAY);
+}
+
 function addBlock(blockId) {
   const block = findBlock(blockId);
   const stageId = blockStageId(block.id);
@@ -580,11 +640,18 @@ function addBlock(blockId) {
   }
   state.activeStage = stageId;
   state.assembled.push(blockId);
-  setStatus(isStageComplete(stageId) ? "Этап собран" : "Действие добавлено");
+  markRecentBlock(blockId);
+  const completed = isStageComplete(stageId);
+  setStatus(completed ? "Этап собран" : "Действие добавлено");
   if (!isStageRequiredBlock(block.id)) {
     diagnosticsOutput.textContent = `${block.title}\nЧто добавили: ${block.explain}\nЗачем: ${block.why}`;
   }
-  sync();
+  if (completed) {
+    sync();
+    scheduleAutoAdvance(stageId);
+  } else {
+    sync();
+  }
 }
 
 function setStatus(text) {
@@ -608,6 +675,7 @@ dropZone.addEventListener("drop", event => {
 
 document.querySelectorAll(".mode").forEach(button => {
   button.addEventListener("click", () => {
+    clearAutoAdvance();
     state.mode = button.dataset.mode;
     if (state.mode === "learn" && !isStageUnlocked(state.activeStage)) {
       state.activeStage = stages.find(stage => !isStageComplete(stage.id))?.id || stages[0].id;
@@ -671,6 +739,7 @@ codeEditor.addEventListener("input", () => {
 });
 
 document.querySelector("#resetBtn").addEventListener("click", () => {
+  clearAutoAdvance();
   state.assembled = [];
   state.activeStage = "foundation";
   state.libraryFilter = "next";
@@ -720,6 +789,7 @@ function runTests() {
       hasReactBlocks() ? "Vite/React часть в реальном приложении проверяется Node runner: npm run build + tests." : ""
     ].filter(Boolean).join("\n");
     setStatus("Этап проверен");
+    scheduleAutoAdvance(stage.id);
     return;
   }
 
@@ -845,7 +915,10 @@ function nextStageAfter(stageId) {
   return stages[index + 1] || null;
 }
 
-function selectStage(stageId) {
+function selectStage(stageId, options = {}) {
+  if (!options.automatic) {
+    clearAutoAdvance();
+  }
   if (state.mode === "learn" && !isStageUnlocked(stageId)) {
     diagnosticsOutput.textContent = `${findStage(stageId).title} пока закрыт.\nЗакройте предыдущие этапы, чтобы курс не превращался в хаос.`;
     setStatus("Этап закрыт");
@@ -856,11 +929,12 @@ function selectStage(stageId) {
   document.querySelectorAll(".filter").forEach(item => {
     item.classList.toggle("active", item.dataset.filter === "next");
   });
-  setStatus(`Этап: ${findStage(stageId).title}`);
+  setStatus(options.automatic ? `Открыт этап: ${findStage(stageId).title}` : `Этап: ${findStage(stageId).title}`);
   sync();
 }
 
 function stageStatusLabel(stageId) {
+  if (state.transitioningStage === stageId) return "переход";
   if (isStageComplete(stageId)) return "готов";
   if (state.mode === "learn" && !isStageUnlocked(stageId)) return "закрыт";
   const stage = findStage(stageId);
