@@ -4,6 +4,16 @@
 
 ---
 
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовая версия для курса: Kotlin 2.3.x, Gradle 9.x, JDK 21 LTS; JDK 17 оставляйте как совместимый минимум для части проектов.
+- Для новых проектов используйте Kotlin DSL, Version Catalogs, K2 compiler, KSP вместо KAPT, `jvmToolchain(21)` там, где стек позволяет.
+- Android-блок держите на актуальной Android Studio, Jetpack Compose, Kotlin Multiplatform и lifecycle-aware coroutines.
+- Интерактивный курс должен проверять null-safety, sealed UI states, coroutine cancellation, Gradle tasks и тесты.
+
+---
+
 ## 1. Установка и окружение
 - **JDK**: рекомендуется Temurin или Liberica, LTS (17/21+). Проверка: `java -version`.
 - **Kotlin Compiler**: поставляется с IntelliJ IDEA / Android Studio. CLI: `curl -s https://get.sdkman.io | bash` → `sdk install kotlin`.
@@ -27,7 +37,7 @@
   ```kotlin
   plugins {
       // используйте актуальную версию Kotlin plugin 2.3.x
-      kotlin("jvm") version "2.3.10"
+      kotlin("jvm") version "2.3.21"
       application
   }
 
@@ -317,3 +327,12 @@ sealed interface UiState {
 - Сообщества: Kotlin Slack, Kotlinlang forums, Kotlin Weekly.
 
 > Kotlin отлично сочетается с современными практиками: функциональный стиль, асинхронность и тестирование. Регулярно тренируйтесь, читайте исходники библиотек и поддерживайте код-стиль — так вы быстрее освоите язык и экосистему.
+
+---
+
+## 22. Заготовка для интерактивного курса
+
+- Модули: `kotlin-basics`, `kotlin-null-safety`, `kotlin-oop`, `kotlin-coroutines`, `kotlin-gradle`, `kotlin-android`, `kotlin-server`.
+- Автопроверка: Gradle tests, ktlint/detekt, coroutine cancellation tests, snapshot UI-state задач.
+- Проектная линия: CLI -> Ktor API -> shared domain module -> Android Compose client -> CI.
+- Платные элементы: ревью coroutine architecture, Gradle performance, Android/KMP roadmap для студента.

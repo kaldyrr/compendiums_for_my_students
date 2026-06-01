@@ -4,6 +4,16 @@
 
 ---
 
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовая версия для курса: Swift 6.3.x и актуальный Xcode, совместимый с текущей macOS; Swift 6 language mode включайте для новых проектов.
+- Для новых уроков добавьте strict concurrency, Observation, Swift Testing, SPM plugins, SwiftData и актуальные privacy/security практики Apple.
+- XCTest оставляйте для UI-тестов и legacy-наборов, а новые unit-тесты показывайте через Swift Testing.
+- Интерактивный курс должен проверять Optionals, async/await, main actor, SwiftUI state и архитектурные границы.
+
+---
+
 ## 1. Подготовка окружения
 - **Xcode** — основная IDE для Swift. Установите актуальную версию, совместимую с вашей macOS.
 - После установки добавьте командные инструменты:
@@ -187,7 +197,7 @@ enum NetworkState {
 - Actors — изоляция состояния (`actor Counter { var value = 0 }`).
 - При работе со старым API — `withCheckedContinuation`.
 - Combine и AsyncSequence для реактивного программирования.
-- В новых проектах ориентируйтесь на Swift 6 language mode и проверки concurrency; это помогает ловить гонки данных на этапе компиляции.
+- В новых проектах ориентируйтесь на Swift 6 language mode, strict concurrency и actor isolation; это помогает ловить гонки данных на этапе компиляции.
 
 ---
 
@@ -325,3 +335,12 @@ enum NetworkState {
 - Практика: Swift Playgrounds, LeetCode (раздел Swift), Pet-проекты.
 
 > Swift быстро развивается: следите за новыми версиями языка и фреймворков, обновляйте навыки асинхронности и архитектуры. Регулярно практикуйтесь на проектах, покрывайте код тестами и автоматизируйте сборку — это поможет стать профессиональным iOS-разработчиком.
+
+---
+
+## 21. Заготовка для интерактивного курса
+
+- Модули: `swift-basics`, `swift-optionals`, `swift-protocols`, `swift-concurrency`, `swiftui-state`, `swift-testing`, `ios-deploy`.
+- Автопроверка: Swift Testing/XCTest, статические задания на Optionals, snapshot SwiftUI, проверки actor/main-thread нарушений.
+- Проектная линия: CLI -> SPM package -> SwiftUI ToDo -> сеть -> локальное хранение -> тесты -> TestFlight-ready checklist.
+- Платные элементы: ревью SwiftUI state, concurrency ошибок, архитектура iOS проекта и подготовка portfolio app.

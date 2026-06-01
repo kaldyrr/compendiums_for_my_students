@@ -4,6 +4,16 @@
 
 ---
 
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Compose v2 и Compose Specification являются базой курса: поле `version` в `compose.yaml` больше не нужно и может давать предупреждение.
+- Для Windows основной маршрут: Docker Desktop + WSL2; в корпоративных окружениях заранее проверяйте лицензию Docker Desktop и разрешенные альтернативы.
+- Для сборок используйте BuildKit, buildx, cache mounts, SBOM/provenance и сканирование образов (Docker Scout, Trivy, Grype).
+- Интерактивный курс должен проверять Dockerfile, `.dockerignore`, Compose services, healthchecks, non-root user и корректную работу контейнера.
+
+---
+
 ## 1. Зачем нужны контейнеры
 - **Контейнер** — изолированная среда с приложением и его зависимостями. Работает поверх ядра ОС (Linux) и повторяемо переносится между машинами.
 - **Изображение (image)** — шаблон, из которого создаётся контейнер. Содержит файловую систему и метаданные.
@@ -289,3 +299,12 @@ jobs:
 - Книги и курсы: *Docker Deep Dive* (Nigel Poulton), *Using Docker* (Adrian Mouat), курсы от Kubernetes Academy.
 
 > Освойте контейнеры локально, затем перенесите приложение в Docker Compose и подключите CI — это даст рабочее понимание контейнеризации от разработки до продакшна.
+
+---
+
+## 18. Заготовка для интерактивного курса
+
+- Модули: `docker-basics`, `dockerfile`, `compose`, `volumes-networks`, `docker-security`, `docker-ci`, `docker-observability`.
+- Автопроверка: `docker build`, `docker compose config`, smoke test HTTP endpoint, проверка non-root пользователя, scan отчеты.
+- Проектная линия: контейнеризация API -> БД через Compose -> healthchecks -> multi-stage -> CI build/push.
+- Платные элементы: ревью Dockerfile, уменьшение размера образа, hardening и диагностика контейнерной сети.

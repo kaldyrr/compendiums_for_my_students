@@ -4,6 +4,16 @@
 
 ---
 
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовая версия для курса: Node.js 24 LTS; Node.js 26 Current используйте для обзора новых API, но не как production baseline.
+- Node.js 20 уже EOL, поэтому не используйте его в новых учебных Dockerfile, `engines`, CI и примерах.
+- Для новых сервисов используйте ESM, `node:test` или Vitest, `undici`/встроенный `fetch`, `AbortController`, structured logging и OpenTelemetry.
+- В интерактивном курсе проверяйте event loop, обработку ошибок, graceful shutdown, security headers, Docker build и нагрузочные сценарии.
+
+---
+
 ## 1. Что такое Node.js и где его использовать
 - Node.js — серверная платформа на базе движка V8 и libuv. Предоставляет событийно-ориентированную неблокирующую модель ввода/вывода.
 - Узкие места: высокие задержки при CPU-bound задачах, необходимость контролировать однопоточность event loop.
@@ -45,7 +55,7 @@
       "build": "tsc -p tsconfig.build.json",
       "start": "NODE_ENV=production node dist/index.js"
     },
-    "engines": { "node": ">=24" }
+    "engines": { "node": ">=24 <27" }
   }
   ```
 - Для новых сервисов ориентируйтесь на Active LTS (v24 на момент обновления). Производственные приложения должны использовать только Active LTS или Maintenance LTS.
@@ -276,3 +286,12 @@
 - Сообщества: Node.js Slack, Reddit r/node, Discord Nodeiflux, Telegram-чаты, локальные митапы.
 
 > Node.js — мощный инструмент для построения современного backend. Следуйте лучшим практикам безопасности и архитектуры, автоматизируйте процессы и измеряйте метрики — так вы сможете создавать надёжные и масштабируемые сервисы.
+
+---
+
+## 21. Заготовка для интерактивного курса
+
+- Модули: `node-runtime`, `node-http`, `node-api`, `node-db`, `node-auth`, `node-testing`, `node-observability`, `node-deploy`.
+- Автопроверка: `node --test`/Vitest, Supertest/undici для API, проверка graceful shutdown, Docker build, security smoke tests.
+- Проектная линия: healthcheck API -> CRUD -> PostgreSQL/Redis -> auth -> очереди -> Docker -> CI.
+- Платные элементы: ревью API дизайна, нагрузочное тестирование, разбор memory leak и event loop delay.

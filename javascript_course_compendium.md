@@ -4,6 +4,16 @@
 
 ---
 
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовый runtime для курса: Node.js 24 LTS. Node.js 26 Current можно показывать в блоке "что нового", но не делать обязательным для production-заданий.
+- Современный JavaScript = ESM, evergreen browsers, Web APIs, `fetch`, `AbortController`, Web Streams, `structuredClone`, `Temporal` как отдельная тема с проверкой поддержки.
+- Следите за TC39 stage 4: часть возможностей ES2025/ES2026 доступна не во всех рантаймах одновременно, поэтому в заданиях фиксируйте `engines` и browser targets.
+- Для интерактивного курса нужны браузерные задачи, Node-задачи, async-debug задачи, DOM/React практики и тесты через Vitest/Playwright.
+
+---
+
 ## 1. Зачем изучать JavaScript
 - Единственный язык, поддерживаемый всеми браузерами без дополнительных плагинов.
 - Подходит для фронтенда (React, Vue, Svelte), бэкенда (Node.js, Deno), мобильных приложений (React Native), десктопа (Electron), IoT и скриптов.
@@ -12,7 +22,7 @@
 ---
 
 ## 2. Окружение и инструменты
-1. **Node.js (текущая Active LTS)** — основной рантайм на V8. Альтернативы под задачи: Deno, Bun.
+1. **Node.js 24 LTS** — основной рантайм на V8. Альтернативы под задачи: Deno, Bun.
 2. **npm/pnpm/yarn** — менеджеры пакетов; Corepack управляет версиями. `pnpm` удобен для монореп и кешей.
 3. **Редактор**: VS Code с расширениями (ESLint, Prettier, GitLens, REST Client).
 4. **Браузеры**: Chrome/Edge/Firefox с DevTools, React/Vue DevTools.
@@ -286,3 +296,12 @@
 - Сообщества: Reddit r/javascript, Stack Overflow, dev.to, Хабр, локальные чаты.
 
 > Освоение JavaScript требует постоянной практики и изучения новых API. Создавайте проекты, участвуйте в опенсорсе, автоматизируйте инфраструктуру и следите за обновлениями языка (TC39). Именно так формируется экспертный уровень.
+
+---
+
+## 22. Заготовка для интерактивного курса
+
+- Модули: `js-basics`, `js-functions`, `js-dom`, `js-async`, `js-modules`, `js-testing`, `js-browser-app`, `js-node-intro`.
+- Автопроверка: Vitest для функций, Playwright для DOM, ESLint flat config, проверка bundle size и async edge cases.
+- Проектная линия: интерактивный список задач -> localStorage -> API client -> тесты -> сборка -> деплой.
+- Платные элементы: ревью архитектуры фронтенда, разбор async/closure ошибок, задания на производительность и доступность.

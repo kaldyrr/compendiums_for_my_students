@@ -4,12 +4,22 @@
 
 ---
 
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовый набор курса: VS Code, JetBrains Toolbox, Visual Studio 2026, Xcode, Android Studio, Docker Desktop/Dev Containers, GitHub CLI.
+- Azure Data Studio уже снят с поддержки, поэтому для SQL Server используйте SSMS, VS Code MSSQL extension или DataGrip/DBeaver.
+- AI-ассистенты включайте как отдельную тему: студент должен уметь проверять ответ компилятором, тестами и документацией.
+- Интерактивный курс должен проверять не "какая IDE лучше", а воспроизводимость окружения: версии SDK, extensions, launch/tasks, formatting и debug configs.
+
+---
+
 ## 1. Как выбрать IDE
 - **Тип проекта**: backend, frontend, мобильная разработка, игры, анализ данных.
 - **Языки**: некоторые IDE оптимизированы под конкретный стек (JetBrains Rider для .NET, GoLand для Go).
 - **Интеграции**: Git, CI/CD, Docker, базы данных, дебаггеры.
 - **Аппаратные ресурсы**: тяжёлые IDE требуют 8+ ГБ RAM. Лёгкие редакторы (VS Code, Neovim) подойдут для слабых машин.
-- **Лицензирование**: JetBrains — платные, есть студенческие лицензии. VS Code, Visual Studio Community, Swift Playgrounds — бесплатны.
+- **Лицензирование**: JetBrains — платные, есть студенческие лицензии. VS Code, Visual Studio Community, Swift Playgrounds — бесплатны; корпоративные условия Docker Desktop и AI-ассистентов проверяйте отдельно.
 
 ---
 
@@ -30,7 +40,7 @@
 - **Go**: `Go` (автоустановка `gopls`, `dlv`), `Go Test Explorer`, `Go Template Support`.
 - **C#**: `C# Dev Kit`, `C#` (powered by Roslyn), `Ionide` (для F#). OmniSharp нужен только для старых учебных проектов.
 - **Rust**: `rust-analyzer`, `Crates`, `CodeLLDB`.
-- **Python**: `Python`, `Pylance`, `Jupyter`.
+- **Python**: `Python`, `Pylance`, `Jupyter`, `Ruff`.
 - **SQL**: `SQLTools`, `MSSQL`, `SQLFluff`, `PostgreSQL`, `Database Client`.
 - **Docker и контейнеры**: `Docker`, `Dev Containers`.
 - **Документация**: `Markdown All in One`, `Draw.io Integration`.
@@ -243,3 +253,12 @@
 - Сообщества: Reddit (`r/vscode`, `r/JetBrains`), Stack Overflow, локальные Slack/Telegram группы.
 
 > Потратьте время на настройку IDE один раз — это окупится скоростью и качеством разработки, а также облегчит командную работу и онбординг новых участников.
+
+---
+
+## 18. Заготовка для интерактивного курса
+
+- Модули: `ide-setup`, `ide-debug`, `ide-formatters`, `ide-git`, `ide-db`, `ide-containers`, `ide-remote`.
+- Автопроверка: наличие конфигов `.editorconfig`, `.vscode/extensions.json`, `launch.json`, `tasks.json`, formatter/linter commands.
+- Проектная линия: настроить рабочее место -> отладка -> форматирование -> Git hooks -> Dev Container.
+- Платные элементы: аудит окружения студента, профили IDE под выбранный стек, командный onboarding kit.

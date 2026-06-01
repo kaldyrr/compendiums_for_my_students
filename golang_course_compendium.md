@@ -4,6 +4,16 @@
 
 ---
 
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовая версия для курса: Go 1.26.x; на 1 июня 2026 актуальная ветка 1.26 уже получила несколько security/bugfix-релизов.
+- Используйте modules, `tool` directive для dev-инструментов, `go work` для локальных multi-module сценариев и `gofmt`/`go vet` как обязательный минимум.
+- В новых заданиях добавляйте контекст (`context.Context`), structured logging (`log/slog`), benchmarks с `b.Loop()` и race detector.
+- Интерактивный курс должен проверять тесты, benchmark basics, race conditions, HTTP handlers и корректную работу с ошибками.
+
+---
+
 ## 1. Зачем изучать Go
 - Компилируемый язык, создавался для серверных приложений, CLI‑утилит, микросервисов, распределённых систем.
 - Простой синтаксис, встроенная поддержка конкурентности (goroutines, channels), статическая типизация и garbage collector.
@@ -414,3 +424,12 @@ value := <-ch
 - Сообщества: Gopher Slack, Reddit r/golang, локальные митапы.
 
 > Начните с небольших проектов, постепенно подключайте взаимодействие с БД, параллелизм и деплой. Опыт приходит через практику и чтение исходников стандартной библиотеки.
+
+---
+
+## 23. Заготовка для интерактивного курса
+
+- Модули: `go-basics`, `go-modules`, `go-errors`, `go-http`, `go-concurrency`, `go-testing`, `go-deploy`.
+- Автопроверка: `go test ./...`, `go vet`, `golangci-lint`, race detector, benchmark smoke tests.
+- Проектная линия: CLI -> HTTP API -> PostgreSQL -> goroutine worker -> Docker -> CI.
+- Платные элементы: ревью конкурентного кода, разбор профилей pprof, улучшение API и observability.

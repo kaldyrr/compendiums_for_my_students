@@ -4,6 +4,16 @@
 
 ---
 
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовая среда курса: Ubuntu 26.04 LTS или Debian 13; для Windows используйте WSL2 с актуальным Ubuntu image.
+- Для Red Hat/Fedora блока добавьте `dnf5`, SELinux basics, firewalld и journald; для Ubuntu/Debian — `apt`, `systemd`, AppArmor.
+- В практику добавьте `rg`, `fd`, `jq`, `yq`, `bat`, `eza`, `btop`, но сначала учите POSIX-базу: `ls`, `cp`, `mv`, `grep`, `find`, `sed`, `awk`.
+- Интерактивный курс должен проверять команды в настоящей shell-среде, права доступа, pipeline, systemd-unit и диагностику сети.
+
+---
+
 ## 1. Что такое Linux
 - Linux - это ядро. В повседневной работе вы взаимодействуете с дистрибутивом: Ubuntu, Debian, Fedora, Arch, openSUSE и т.д.
 - Почти все задачи делаются через терминал: навигация, редактирование, администрирование, автоматизация.
@@ -481,4 +491,13 @@ systemctl status service
 - Сначала `grep/find`, потом `rm`.
 - Сначала `systemctl status` и `journalctl`, потом перезапуск.
 - Сначала маленькая команда, потом массовая автоматизация.
+
+---
+
+## 21. Заготовка для интерактивного курса
+
+- Модули: `linux-shell`, `linux-files`, `linux-permissions`, `linux-processes`, `linux-network`, `linux-systemd`, `linux-debugging`.
+- Автопроверка: проверка stdout, файловой структуры, прав доступа, unit-файлов, exit codes и сетевых портов.
+- Проектная линия: настроить серверную папку -> пользователя -> сервис -> логи -> firewall -> backup script.
+- Платные элементы: live-debug сценарии, разбор сломанного сервиса, hardening чеклист для учебного VPS.
 

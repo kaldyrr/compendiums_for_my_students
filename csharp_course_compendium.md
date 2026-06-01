@@ -4,6 +4,16 @@
 
 ---
 
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовая версия для курса: .NET 10 LTS, SDK 10.0.300+, C# 14. .NET 11 Preview оставляйте только для демонстраций будущих возможностей.
+- Для новых проектов используйте `net10.0`, `global.json`, Central Package Management через `Directory.Packages.props`, nullable reference types и analyzers.
+- IDE: Visual Studio 2026 на Windows, JetBrains Rider или VS Code + C# Dev Kit; Visual Studio for Mac больше не используем.
+- В интерактивном курсе каждую тему связывайте с тестами, DI, логированием, Docker и мини-API, чтобы студент видел production-контекст.
+
+---
+
 ## 1. Что такое C# и экосистема .NET
 - **C#** — строго типизированный язык общего назначения. Используется для backend‑разработки, desktop и мобильных приложений, игр (Unity), встраиваемых систем, облачных сервисов.
 - **.NET** — кроссплатформенная платформа от Microsoft. Включает CLR (виртуальную машину), стандартную библиотеку, SDK с инструментами сборки и упаковки, а также обширную экосистему библиотек.
@@ -74,7 +84,7 @@ csharp_preferred_modifier_order = public, private, protected, internal, static, 
   dotnet new sln -n LearnSolution
   dotnet sln add LearnBasics/LearnBasics.csproj
   ```
-- **Target Framework Monikers (TFM)**: `netX.Y` (актуальная LTS/STS), `netstandard2.1`, `net48`. Выбирайте текущую LTS для учебных и производственных проектов; .NET-релизы чередуются между LTS и STS.
+- **Target Framework Monikers (TFM)**: `net10.0` для новых учебных и production-проектов, `netstandard2.1` для совместимых библиотек, `net48` только для legacy. .NET-релизы чередуются между LTS и STS.
 - **NuGet** — менеджер пакетов (`dotnet add package AutoMapper`). Следите за версиями и лицензиями.
 - `global.json` фиксирует версию SDK для команды/CI.
 - `Directory.Build.props` и `Directory.Packages.props` помогают централизовать настройки и версии пакетов.
@@ -376,3 +386,12 @@ public class CalculatorTests
 - Сообщества: DotNext, .NET Foundation, Telegram‑чаты и Stack Overflow.
 
 > Освойте основные темы, подготовьте pet‑project, разверните его в Docker и подключите CI — это хороший набор навыков для первого junior‑уровня.
+
+---
+
+## 25. Заготовка для интерактивного курса
+
+- Модули: `cs-basics`, `cs-oop`, `cs-linq`, `cs-async`, `aspnet-api`, `efcore-data`, `cs-testing-deploy`.
+- Автопроверка: `dotnet test`, проверка analyzers, snapshot HTTP-ответов, Testcontainers для БД, lint через `dotnet format --verify-no-changes`.
+- Проектная линия: CLI калькулятор -> библиотека домена -> Web API -> EF Core -> Docker -> CI.
+- Платные элементы: code review DI/async ошибок, разбор профилирования, ревью итогового API и консультация по .NET career path.

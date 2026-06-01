@@ -1,6 +1,16 @@
 # Компендиум по TypeScript
 
-Глубокое руководство по TypeScript: установка, конфигурация, статическая типизация, продвинутые типы, сборка, тестирование и интеграция с современными фреймворками. Материал ориентирован на разработчиков, которые хотят писать надёжный JavaScript‑код. На момент обновления актуальна ветка TypeScript 5.9.
+Глубокое руководство по TypeScript: установка, конфигурация, статическая типизация, продвинутые типы, сборка, тестирование и интеграция с современными фреймворками. Материал ориентирован на разработчиков, которые хотят писать надёжный JavaScript‑код. На момент обновления актуальна ветка TypeScript 6.0.
+
+---
+
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовая версия для курса: TypeScript 6.0 + Node.js 24 LTS.
+- Для Node-проектов используйте `module: "NodeNext"`/`moduleResolution: "NodeNext"`; для bundler-проектов используйте `module: "Preserve"` или `ESNext` + `moduleResolution: "Bundler"`.
+- Не учите новые проекты на `target: "ES5"`, `moduleResolution: "node"`/`classic`, AMD/UMD/SystemJS и `baseUrl` как корне поиска; эти режимы уходят в legacy.
+- Интерактивный курс должен проверять типы, runtime-валидацию, миграции JS -> TS, API-контракты и типовые ошибки inference.
 
 ---
 
@@ -25,7 +35,7 @@
   ```json
   {
     "compilerOptions": {
-      "target": "ES2022",
+      "target": "ES2025",
       "module": "ESNext",
       "moduleResolution": "Bundler",
       "strict": true,
@@ -41,9 +51,8 @@
       "forceConsistentCasingInFileNames": true,
       "resolveJsonModule": true,
       "types": ["node"],
-      "baseUrl": "./src",
       "paths": {
-        "@/*": ["*"]
+        "@/*": ["./src/*"]
       },
       "outDir": "./dist"
     },
@@ -51,7 +60,7 @@
     "exclude": ["node_modules"]
   }
   ```
-- Для Node.js-проектов используйте `module: "Node20"` и `moduleResolution: "Node20"`. `NodeNext` оставляйте только если нужен плавающий режим под новые ветки Node. Для bundler‑проектов оставляйте `Bundler`.
+- Для Node.js-проектов используйте `module: "NodeNext"` и `moduleResolution: "NodeNext"`. Для bundler‑проектов оставляйте `Bundler`.
 - Для монореп (pnpm workspaces, Nx, Turborepo) используйте `tsconfig.base.json` и наследование.
 - Служебные файлы: `tsconfig.node.json`, `tsconfig.eslint.json`.
 
@@ -207,7 +216,7 @@ const users: Array<{ id: number; name: string }> = [
 
 ## 10. Работа с модулями
 - ESM (ECMAScript Modules) по умолчанию: `import`, `export`.
-- Для CommonJS укажите `"module": "CommonJS"`. Для Node.js ESM используйте `module: "Node20"` и `moduleResolution: "Node20"`.
+- Для CommonJS укажите `"module": "CommonJS"` только при необходимости поддержки legacy. Для Node.js ESM используйте `module: "NodeNext"` и `moduleResolution: "NodeNext"`.
 - `esModuleInterop`: позволяет писать `import express from "express"` для CommonJS библиотек.
 - Типы из DefinitelyTyped: `@types/express`, `@types/node`.
 - `declare global` и `declare module` — расширение типов.
@@ -369,3 +378,12 @@ const users: Array<{ id: number; name: string }> = [
 - Сообщества: TypeScript Discord, Reddit r/typescript, Telegram чаты, Stack Overflow.
 
 > TypeScript — мощный инструмент, когда вы используете строгую конфигурацию, следуете архитектурным паттернам и держите типы в актуальном состоянии. Инвестируйте в tooling, покрывайте код тестами и регулярно проводите рефакторинг типов.
+
+---
+
+## 21. Заготовка для интерактивного курса
+
+- Модули: `ts-config`, `ts-basic-types`, `ts-generics`, `ts-narrowing`, `ts-runtime-validation`, `ts-react-node`, `ts-migration`.
+- Автопроверка: `tsc --noEmit`, type-level tests через `tsd`/`expect-type`, ESLint, Vitest, проверка API schemas.
+- Проектная линия: типизация JS проекта -> строгий `tsconfig` -> DTO/domain types -> runtime validation -> typed API client.
+- Платные элементы: ревью типов, разбор сложных generics, миграционная стратегия для существующего JS/Node проекта.

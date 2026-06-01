@@ -4,7 +4,7 @@
   
 ![Git](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Git-logo.svg/250px-Git-logo.svg.png) ![](https://upload.wikimedia.org/wikipedia/commons/4/42/Invisible_square.png) ![GitHub](https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/GitHub_Invertocat_Logo.svg/120px-GitHub_Invertocat_Logo.svg.png)
 
-Это написано для типов, которые впервые ударяются об систему контроля версий и в частности GitHub. Описывает жизнь репозитория: настройка Git'а, работа с ветками, Pull Request, Issues, Actions, безопасность и командные практики.
+Материал написан для студентов, которые впервые знакомятся с системой контроля версий и GitHub. Он описывает жизнь репозитория: настройка Git, работа с ветками, Pull Request, Issues, Actions, безопасность и командные практики.
 
 </div>
 
@@ -12,12 +12,20 @@
 
 | Урок | Тема | Статус | Дедлайн |
 |------|------|--------|---------|
-| 1 | [Установка и настройка Git](https://github.com/kotikme/git_guide_plus/blob/gitguideplus/git_guide_plus/lessons/1.md) | 🟢 Активно | Как можно скорее |
-| 2 | [Создание репозитория](https://github.com/kotikme/git_guide_plus/blob/gitguideplus/git_guide_plus/lessons/2.md) | 🟢 Активно | Как можно скорее |
-| 3 | [Клонирование репозитория](https://github.com/kotikme/git_guide_plus/blob/gitguideplus/git_guide_plus/lessons/3.md) | 🟢 Активно | Как можно скорее |
-| 4 | [Управление ветками](https://github.com/kotikme/git_guide_plus/blob/gitguideplus/git_guide_plus/lessons/4.md) | 🟢 Активно | Как можно скорее |
+| 1 | [Установка и настройка Git](lessons/1.md) | 🟢 Активно | Как можно скорее |
+| 2 | [Создание репозитория](lessons/2.md) | 🟢 Активно | Как можно скорее |
+| 3 | [Клонирование репозитория](lessons/3.md) | 🟢 Активно | Как можно скорее |
+| 4 | [Управление ветками](lessons/4.md) | 🟢 Активно | Как можно скорее |
 | 5 | На базе полученных знаний поработать над вашим проектом | 🟡 Скоро | Как можно скорее |
 | * | Индивидуальное задание | ⚫ Планируется | Когда будет, если будет |
+
+# Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовый стек курса: актуальный Git 2.5x, GitHub CLI, Git Credential Manager, fine-grained Personal Access Tokens и SSH-ключи Ed25519.
+- Для новых уроков используйте `git switch`/`git restore`, но объясняйте `checkout`, потому что он часто встречается в старых проектах.
+- В security-блок добавьте secret scanning, push protection, signed commits/tags и правила branch protection.
+- В интерактивном курсе Git проверяется через настоящие репозитории: история коммитов, ветки, конфликт, rebase, PR-процесс и CI.
 
 # 1. Основы Git и GitHub
 Git — распределённая система управления версиями. Проект был создан Линусом Торвальдсом для управления разработкой ядра Linux, первая версия выпущена 7 апреля 2005 года.
@@ -96,7 +104,7 @@ git config --list
   # Ключ загружается в память и становится доступным для SSH-клиента
   # Запросит пароль, если вы установили его при создании ключа
   ssh-add ~/.ssh/id_ed25519
-  cat ~/.ssh/id_ed25519.pub            # копируйте ваш ключ(и скидывайте мне(шутка))
+  cat ~/.ssh/id_ed25519.pub            # копируйте только публичный ключ
   ```
 Вставьте ключ в GitHub → Settings → SSH and GPG keys → New SSH key.
 
@@ -219,9 +227,8 @@ git status
 git pull --rebase
 
 # Создает и переключается на новую ветку feature/login
-# -b означает "создать новую ветку"
 # Имя ветки описывает задачу (feature/login)
-git checkout -b feature/login
+git switch -c feature/login
 
 # === Вносите изменения в код ===
 # Редактируете файл src/LoginService.cs
@@ -401,6 +408,13 @@ CODEOWNERS — автоматически назначает ревьюеров 
 5. Настройте GitHub Actions и простую CI‑цепочку.
 6. Добавьте Issue шаблоны, CODEOWNERS, Dependabot.
 7. Изучите advanced темы: submodules, git-lfs, signed commits, `gh` CLI.
+
+# 16. Заготовка для интерактивного курса
+
+- Модули: `git-install`, `git-repo`, `git-branches`, `git-merge-rebase`, `git-github-pr`, `git-ci`, `git-security`.
+- Автопроверка: состояние `git status`, наличие коммитов, корректные ветки, конфликтные файлы, remote/upstream, passing GitHub Actions.
+- Проектная линия: локальный репозиторий -> GitHub remote -> feature branch -> PR -> review fixes -> release tag.
+- Платные элементы: ревью истории коммитов, разбор конфликтов, настройка branch protection и GitHub Actions для учебного проекта.
 
 ## Ресурсы
 Документация: [git-scm.com/doc](https://git-scm.com/doc), [docs.github.com](https://docs.github.com/).

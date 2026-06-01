@@ -4,6 +4,16 @@
 
 ---
 
+## Актуализация 2026-06
+
+- Последняя ревизия: 1 июня 2026.
+- Базовая версия для курса: текущий `stable` через `rustup`; Rust 2024 edition используйте по умолчанию для новых проектов.
+- Не привязывайте уроки к одному patch-релизу Rust: фиксируйте toolchain в `rust-toolchain.toml`, если задание чувствительно к версии.
+- Для production-блоков добавьте `cargo audit`, `cargo deny`, `cargo vet`, `tracing`, `tokio-console` и `criterion`.
+- Интерактивный курс должен учить читать ошибки borrow checker, исправлять lifetime/ownership проблемы и писать безопасные API без лишнего `clone()`.
+
+---
+
 ## 1. Установка и обновление
 - Установите `rustup` — менеджер инструментов Rust:
   ```bash
@@ -315,3 +325,12 @@ fn render(state: State) {
 - Блоги и подкасты: Rust Blog, Ferry Blog, Rustacean Station.
 
 > Rust требует времени на понимание владения, но взамен даёт безопасность и производительность на уровне C/C++. Практикуйтесь, читайте error messages, используйте Clippy — и borrow checker станет вашим союзником.
+
+---
+
+## 21. Заготовка для интерактивного курса
+
+- Модули: `rust-basics`, `rust-ownership`, `rust-error-handling`, `rust-generics`, `rust-async`, `rust-testing`, `rust-deploy`.
+- Автопроверка: `cargo test`, `cargo fmt --check`, `cargo clippy -D warnings`, compile-fail задания через `trybuild`.
+- Проектная линия: CLI -> библиотека -> async HTTP service -> SQLx -> Docker -> CI.
+- Платные элементы: ревью ownership решений, разбор unsafe/FFI, профилирование и оптимизация binary size.
