@@ -1,0 +1,53 @@
+services:
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  app:
+    image: ghcr.io/OWNER/interactive-course-app:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/data/course.db
+      RUNNER_QUEUE_DB: /data/course.db
+    volumes:
+      - course_data:/data
+    expose:
+      - "3000"
+
+  runner:
+    image: ghcr.io/OWNER/interactive-course-runner:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/data/course.db
+      RUNNER_CONCURRENCY: "1"
+      RUNNER_TIMEOUT_MS: "5000"
+      RUNNER_MAX_STDOUT_BYTES: "2000000"
+      NPM_CONFIG_STRICT_SSL: "false"
+    volumes:
+      - course_data:/data
+      - runner_tmp:/tmp/course-runner
+    mem_limit: 384m
+    cpus: "1.0"
+    pids_limit: 128
+    network_mode: "none"
+
+volumes:
+  caddy_data:
+  caddy_config:
+  course_data:
+  runner_tmp:

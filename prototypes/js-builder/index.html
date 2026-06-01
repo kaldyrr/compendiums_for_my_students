@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JS Builder Course Prototype</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="course-window" aria-label="JS course workspace">
+        <header class="titlebar">
+          <div class="traffic" aria-hidden="true">
+            <span class="red"></span>
+            <span class="yellow"></span>
+            <span class="green"></span>
+          </div>
+          <div class="lesson-title">
+            <strong>JavaScript Builder</strong>
+            <span>Урок 1: счетчик задач</span>
+          </div>
+          <div class="mode-switch" role="group" aria-label="Course mode">
+            <button class="mode active" data-mode="learn">Обучающий</button>
+            <button class="mode" data-mode="advanced">Продвинутый</button>
+          </div>
+        </header>
+
+        <div class="toolbar">
+          <button id="runBtn" class="primary">Run</button>
+          <button id="testBtn">Tests</button>
+          <button id="resetBtn">Reset</button>
+          <span id="statusText" class="status">Готово</span>
+        </div>
+
+        <section class="workspace">
+          <aside class="library" aria-label="Blocks">
+            <h2>Блоки</h2>
+            <div id="blockLibrary" class="block-list"></div>
+          </aside>
+
+          <section class="builder" aria-label="Builder canvas">
+            <div class="panel-head">
+              <h2>Сборка</h2>
+              <span id="stepCount">0 блоков</span>
+            </div>
+            <div id="dropZone" class="drop-zone" tabindex="0">
+              <p>Перетащите блоки сюда</p>
+            </div>
+          </section>
+
+          <section class="code-panel" aria-label="Generated code">
+            <div class="tabs">
+              <button class="tab active" data-tab="code">main.js</button>
+              <button class="tab advanced-only" data-tab="package">package.json</button>
+              <button class="tab advanced-only" data-tab="npmrc">.npmrc</button>
+            </div>
+            <textarea id="codeEditor" spellcheck="false"></textarea>
+          </section>
+        </section>
+
+        <footer class="output-area">
+          <section>
+            <h2>Console</h2>
+            <pre id="consoleOutput"></pre>
+          </section>
+          <section>
+            <h2>Diagnostics</h2>
+            <pre id="diagnosticsOutput"></pre>
+          </section>
+          <section class="preview">
+            <h2>Visual state</h2>
+            <div id="visualState"></div>
+          </section>
+        </footer>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>
