@@ -204,6 +204,123 @@ const blocks = [
     deps: ["reactState"],
     runner: "vite-react",
     code: "// AddTaskForm добавлен в src/App.jsx."
+  },
+  {
+    id: "taskItemComponent",
+    title: "Карточка задачи",
+    category: "React UI",
+    required: false,
+    explain: "Выносит одну задачу в отдельный компонент.",
+    why: "Так интерфейс легче расширять: чекбокс, текст, кнопки и стили живут рядом.",
+    deps: ["taskListComponent"],
+    runner: "vite-react",
+    code: "// TaskItem добавлен в src/App.jsx."
+  },
+  {
+    id: "emptyStateView",
+    title: "Пустой экран",
+    category: "React UI",
+    required: false,
+    explain: "Показывает понятное сообщение, когда задач нет.",
+    why: "Реальный интерфейс должен хорошо выглядеть не только с тестовыми данными.",
+    deps: ["taskListComponent"],
+    runner: "vite-react",
+    code: "// EmptyState добавлен в src/App.jsx."
+  },
+  {
+    id: "filterControls",
+    title: "Фильтр на экране",
+    category: "React UI",
+    required: false,
+    explain: "Добавляет переключатель: все задачи или только открытые.",
+    why: "Студент видит, как состояние меняет список на экране.",
+    deps: ["reactState"],
+    runner: "vite-react",
+    code: "// Фильтр задач добавлен в src/App.jsx."
+  },
+  {
+    id: "completionStatsView",
+    title: "Статистика на экране",
+    category: "React UI",
+    required: false,
+    explain: "Показывает выполненные и оставшиеся задачи прямо в интерфейсе.",
+    why: "Так вычисления из массива становятся полезной частью продукта.",
+    deps: ["reactState"],
+    runner: "vite-react",
+    code: "// Статистика задач добавлена в src/App.jsx."
+  },
+  {
+    id: "localStorageSave",
+    title: "Сохранить задачи",
+    category: "Storage",
+    required: false,
+    explain: "Готовит функцию сохранения задач в браузере.",
+    why: "После перезагрузки студент ожидает увидеть те же данные, а не пустой проект.",
+    deps: ["storageDraft"],
+    code: "function saveTasksSnapshot(tasks) {\n  return JSON.stringify(tasks);\n}\nconsole.log(\"save\", saveTasksSnapshot(app.tasks));"
+  },
+  {
+    id: "localStorageRestore",
+    title: "Восстановить задачи",
+    category: "Storage",
+    required: false,
+    explain: "Готовит безопасное чтение сохраненного списка.",
+    why: "Любое сохранение нужно уметь восстановить и не сломаться на плохих данных.",
+    deps: ["localStorageSave"],
+    code: "function restoreTasksSnapshot(snapshot) {\n  try {\n    const parsed = JSON.parse(snapshot);\n    return Array.isArray(parsed) ? parsed : [];\n  } catch {\n    return [];\n  }\n}\nconsole.log(\"restore\", restoreTasksSnapshot(saveTasksSnapshot(app.tasks)).length);"
+  },
+  {
+    id: "testNormalize",
+    title: "Тест проверки ввода",
+    category: "Тесты",
+    required: false,
+    explain: "Проверяет, что пустой текст вызывает ошибку, а нормальный текст проходит.",
+    why: "Тест превращает правило в проверяемое обещание программы.",
+    deps: ["validate"],
+    code: "function expectThrows(fn, label) {\n  try {\n    fn();\n    console.log(label, \"fail\");\n  } catch {\n    console.log(label, \"pass\");\n  }\n}\nexpectThrows(() => normalizeTaskText(\"\"), \"empty task\");\nconsole.log(\"valid task\", normalizeTaskText(\"  Сделать проект  \"));"
+  },
+  {
+    id: "testAddTask",
+    title: "Тест добавления",
+    category: "Тесты",
+    required: false,
+    explain: "Проверяет, что добавление увеличивает список задач.",
+    why: "Студент видит, что тесты проверяют поведение, а не просто наличие кода.",
+    deps: ["add"],
+    code: "const beforeAddTest = app.tasks.length;\naddTask(\"Проверить тест\");\nconsole.log(\"add test\", app.tasks.length === beforeAddTest + 1 ? \"pass\" : \"fail\");"
+  },
+  {
+    id: "npmNetworkProfile",
+    title: "Профиль сети вуза",
+    category: "Release",
+    required: false,
+    explain: "Фиксирует `.npmrc` с `strict-ssl=false` для лабораторной сети.",
+    why: "Студент не должен застрять на сертификатах до первой сборки.",
+    deps: ["viteScaffold"],
+    runner: "vite-react",
+    code: "// .npmrc подготовлен для вузовской сети."
+  },
+  {
+    id: "buildChecklist",
+    title: "Проверка сборки",
+    category: "Release",
+    required: false,
+    explain: "Добавляет финальную проверку `npm run build` и smoke-тест проекта.",
+    why: "Перед показом другим людям нужно доказать, что проект собирается.",
+    deps: ["viteScaffold"],
+    runner: "vite-react",
+    code: "// Финальная команда: npm run build."
+  },
+  {
+    id: "publishPlan",
+    title: "План публикации",
+    category: "Release",
+    required: false,
+    explain: "Готовит короткий чеклист: ссылка, доступ, ограничения и что показывать преподавателю.",
+    why: "Итог курса должен заканчиваться демонстрацией, а не просто последним блоком кода.",
+    deps: ["buildChecklist"],
+    runner: "vite-react",
+    code: "// План публикации: build, preview, ссылка, демонстрация."
   }
 ];
 
@@ -252,7 +369,7 @@ const stages = [
     goal: "Подготовить мост от консольной логики к браузерному интерфейсу.",
     result: "Студент понимает, зачем нужны шаблон, событие и сохранение.",
     blockIds: ["domTemplate", "eventPlan", "storageDraft"],
-    required: ["domTemplate", "eventPlan"]
+    required: ["domTemplate", "eventPlan", "storageDraft"]
   },
   {
     id: "react",
@@ -262,6 +379,44 @@ const stages = [
     result: "Технические слова появляются после результата: src/App.jsx, useState, components.",
     blockIds: ["viteScaffold", "reactRoot", "appComponent", "reactState", "taskListComponent", "addFormComponent"],
     required: ["viteScaffold", "reactRoot", "appComponent", "reactState", "taskListComponent", "addFormComponent"]
+  },
+  {
+    id: "reactPolish",
+    title: "Довести экран",
+    short: "UI",
+    goal: "Сделать React-экран похожим на продукт: карточка задачи, пустой экран и одно улучшение.",
+    result: "Проект становится не просто рабочим, а понятным для пользователя.",
+    blockIds: ["taskItemComponent", "emptyStateView", "filterControls", "completionStatsView"],
+    required: ["taskItemComponent", "emptyStateView"],
+    choose: 1
+  },
+  {
+    id: "persistence",
+    title: "Сохранить прогресс",
+    short: "память",
+    goal: "Добавить сохранение и восстановление задач после перезагрузки.",
+    result: "Студент видит, что приложение может помнить состояние между запусками.",
+    blockIds: ["localStorageSave", "localStorageRestore"],
+    required: ["localStorageSave", "localStorageRestore"]
+  },
+  {
+    id: "testing",
+    title: "Проверить проект",
+    short: "тесты",
+    goal: "Добавить первые проверки: правило ввода и добавление задачи.",
+    result: "Проект перестает быть ручной демонстрацией и получает проверяемые гарантии.",
+    blockIds: ["testNormalize", "testAddTask"],
+    required: ["testNormalize", "testAddTask"]
+  },
+  {
+    id: "release",
+    title: "Подготовить показ",
+    short: "релиз",
+    goal: "Собрать финальный чеклист: вузовская сеть, build-проверка и план публикации.",
+    result: "Студент понимает, как показать проект другим и что проверить перед сдачей.",
+    blockIds: ["npmNetworkProfile", "buildChecklist", "publishPlan"],
+    required: ["npmNetworkProfile", "buildChecklist"],
+    choose: 1
   }
 ];
 
@@ -311,6 +466,7 @@ const state = {
   selectedTab: "code",
   assembled: [],
   fileOverrides: {},
+  projectRevision: 0,
   activeStage: "foundation",
   transitioningStage: null,
   recentBlock: null,
@@ -497,6 +653,7 @@ function renderBuilder() {
       row.querySelector(".remove").addEventListener("click", () => {
         clearAutoAdvance();
         state.assembled.splice(index, 1);
+        state.projectRevision += 1;
         sync();
       });
       body.appendChild(row);
@@ -540,7 +697,8 @@ function generateCode() {
 }
 
 function currentFileText() {
-  if (state.fileOverrides[state.selectedTab]) return state.fileOverrides[state.selectedTab];
+  const override = state.fileOverrides[state.selectedTab];
+  if (override && override.revision === state.projectRevision) return override.value;
   if (state.selectedTab === "appjsx") return generateReactAppCode();
   if (state.selectedTab === "mainjsx") return files.mainjsx;
   if (state.selectedTab === "viteconfig") return files.viteconfig;
@@ -560,7 +718,7 @@ function renderEditor() {
   codeEditor.readOnly = !editable;
   codeEditor.classList.toggle("is-editable", editable);
   codeHint.textContent = editable
-    ? `Editable: можно менять ${currentTabName()} руками. Сейчас открыт этап "${currentStage().title}".`
+    ? `Editable: можно менять ${currentTabName()} руками. Новые действия обновят generated-код.`
     : `Read-only: код рождается из действий этапа "${currentStage().title}". Ручное редактирование доступно в продвинутом режиме.`;
   codeEditor.value = currentFileText();
 }
@@ -640,6 +798,7 @@ function addBlock(blockId) {
   }
   state.activeStage = stageId;
   state.assembled.push(blockId);
+  state.projectRevision += 1;
   markRecentBlock(blockId);
   const completed = isStageComplete(stageId);
   setStatus(completed ? "Этап собран" : "Действие добавлено");
@@ -733,7 +892,10 @@ document.querySelectorAll(".tab").forEach(button => {
 
 codeEditor.addEventListener("input", () => {
   if (state.mode === "advanced") {
-    state.fileOverrides[state.selectedTab] = codeEditor.value;
+    state.fileOverrides[state.selectedTab] = {
+      value: codeEditor.value,
+      revision: state.projectRevision
+    };
     setStatus(`${currentTabName()} изменен вручную`);
   }
 });
@@ -741,6 +903,8 @@ codeEditor.addEventListener("input", () => {
 document.querySelector("#resetBtn").addEventListener("click", () => {
   clearAutoAdvance();
   state.assembled = [];
+  state.fileOverrides = {};
+  state.projectRevision += 1;
   state.activeStage = "foundation";
   state.libraryFilter = "next";
   document.querySelectorAll(".filter").forEach(item => {
@@ -1012,7 +1176,14 @@ function generateReactAppCode() {
   const includeState = selected.has("reactState");
   const includeList = selected.has("taskListComponent");
   const includeForm = selected.has("addFormComponent");
-  const imports = includeState ? `import { useState } from "react";\n\n` : "";
+  const includeTaskItem = selected.has("taskItemComponent");
+  const includeEmpty = selected.has("emptyStateView");
+  const includeFilter = selected.has("filterControls");
+  const includeStats = selected.has("completionStatsView");
+  const includePersistence = selected.has("localStorageRestore");
+  const reactImports = ["useState"];
+  if (includePersistence) reactImports.push("useEffect");
+  const imports = includeState ? `import { ${reactImports.join(", ")} } from "react";\n\n` : "";
   const stateCode = includeState
     ? `const initialTasks = [
   { text: "Прочитать урок", done: true },
@@ -1021,11 +1192,32 @@ function generateReactAppCode() {
 
 `
     : "";
+  const itemCode = includeTaskItem
+    ? `function TaskItem({ task }) {
+  return (
+    <li className={task.done ? "done" : ""}>
+      <span>{task.done ? "✓" : "○"}</span>
+      {task.text}
+    </li>
+  );
+}
+
+`
+    : "";
+  const emptyCode = includeEmpty
+    ? `function EmptyState() {
+  return <p>Задач пока нет. Добавьте первую задачу.</p>;
+}
+
+`
+    : "";
   const listCode = includeList
     ? `function TaskList({ tasks }) {
+  ${includeEmpty ? "if (tasks.length === 0) return <EmptyState />;" : ""}
+
   return (
     <ul>
-      {tasks.map(task => <li key={task.text}>{task.text}</li>)}
+      {tasks.map(task => ${includeTaskItem ? "<TaskItem key={task.text} task={task} />" : "<li key={task.text}>{task.text}</li>"})}
     </ul>
   );
 }
@@ -1052,8 +1244,38 @@ function generateReactAppCode() {
 
 `
     : "";
+  const filterCode = includeFilter
+    ? `function FilterControls({ filter, onFilterChange }) {
+  return (
+    <div>
+      <button type="button" onClick={() => onFilterChange("all")} disabled={filter === "all"}>Все</button>
+      <button type="button" onClick={() => onFilterChange("open")} disabled={filter === "open"}>Открытые</button>
+    </div>
+  );
+}
+
+`
+    : "";
+  const statsCode = includeStats
+    ? `function TaskStats({ tasks }) {
+  const done = tasks.filter(task => task.done).length;
+  return <p>Готово: {done}. Осталось: {tasks.length - done}.</p>;
+}
+
+`
+    : "";
   const appBody = includeState
-    ? `  const [tasks, setTasks] = useState(initialTasks);
+    ? `  const [tasks, setTasks] = useState(${includePersistence ? `() => {
+    const saved = localStorage.getItem("tasks");
+    return saved ? JSON.parse(saved) : initialTasks;
+  }` : "initialTasks"});
+  ${includeFilter ? `const [filter, setFilter] = useState("all");
+  const visibleTasks = filter === "open" ? tasks.filter(task => !task.done) : tasks;
+` : ""}
+  ${includePersistence ? `useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
+` : ""}
 
   function addTask(text) {
     const value = text.trim();
@@ -1064,14 +1286,16 @@ function generateReactAppCode() {
   return (
     <main>
       <h1>Счетчик задач</h1>
+      ${includeFilter ? "<FilterControls filter={filter} onFilterChange={setFilter} />" : ""}
       ${includeForm ? "<AddTaskForm onAdd={addTask} />" : "<button onClick={() => addTask(\"Новая задача\")}>Добавить</button>"}
-      ${includeList ? "<TaskList tasks={tasks} />" : "<pre>{JSON.stringify(tasks, null, 2)}</pre>"}
+      ${includeStats ? "<TaskStats tasks={tasks} />" : ""}
+      ${includeList ? `<TaskList tasks={${includeFilter ? "visibleTasks" : "tasks"}} />` : "<pre>{JSON.stringify(tasks, null, 2)}</pre>"}
       <p>Всего: {tasks.length}</p>
     </main>
   );`
     : `  return <h1>Счетчик задач</h1>;`;
 
-  return `${imports}${stateCode}${listCode}${formCode}export default function App() {
+  return `${imports}${stateCode}${itemCode}${emptyCode}${listCode}${filterCode}${statsCode}${formCode}export default function App() {
 ${appBody}
 }`;
 }
