@@ -740,13 +740,21 @@ h2 {
   display: flex;
   gap: 4px;
   padding: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
   border-bottom: 1px solid var(--line);
   background: var(--panel-2);
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tab {
+  flex: 0 0 auto;
   min-height: 30px;
   padding: 0 12px;
+  white-space: nowrap;
+  scroll-snap-align: start;
 }
 
 .tab.active {
